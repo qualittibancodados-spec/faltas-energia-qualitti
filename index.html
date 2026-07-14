@@ -48,6 +48,102 @@
     background: var(--gold);
   }
 
+  /* ---------- Tela de Login ---------- */
+  .login-screen{
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    padding: 40px 26px;
+    text-align: center;
+  }
+  .login-screen .icon-wrap{
+    width: 64px; height:64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .login-screen .icon-wrap svg{ width:30px; height:30px; }
+  .login-screen h2{
+    font-family: "Poppins", system-ui, sans-serif;
+    color: var(--red-dark);
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+  .login-screen p{
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 26px;
+  }
+  #google-signin-btn{
+    display:flex;
+    justify-content:center;
+  }
+  .login-loading{
+    display:none;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    margin-top: 14px;
+  }
+  .login-loading.show{ display:block; }
+  .login-error{
+    display:none;
+    color: var(--red);
+    font-size: 12.5px;
+    margin-top: 14px;
+    font-weight: 600;
+  }
+  .login-error.show{ display:block; }
+
+  /* ---------- Faixa do usuário logado ---------- */
+  .user-bar{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin-bottom: 16px;
+  }
+  .user-bar img{
+    width: 28px; height:28px;
+    border-radius: 50%;
+    flex-shrink:0;
+  }
+  .user-bar .info{
+    flex:1;
+    min-width:0;
+  }
+  .user-bar .info .nome{
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--red-dark);
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+  }
+  .user-bar .info .email{
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+  }
+  .user-bar button{
+    flex-shrink:0;
+    background: transparent;
+    border: 1.4px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor:pointer;
+  }
+
   /* ---------- Header ---------- */
   header{
     background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
@@ -523,6 +619,31 @@
 <div class="circuit-line"></div>
 
 <main>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-screen">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="#7A1518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2>Entrar para registrar</h2>
+    <p>Entre com sua conta Google para que o sistema<br>identifique automaticamente quem está lançando.</p>
+    <div id="google-signin-btn"></div>
+    <div class="login-loading" id="login-loading">Entrando...</div>
+    <div class="login-error" id="login-error">Não foi possível confirmar seu login. Tente novamente.</div>
+  </div>
+
+  <!-- APP (visível só depois do login) -->
+  <div id="app-content" style="display:none;">
+
+  <div class="user-bar">
+    <img id="user-avatar" src="" alt="">
+    <div class="info">
+      <div class="nome" id="user-nome">—</div>
+      <div class="email" id="user-email">—</div>
+    </div>
+    <button type="button" id="btn-logout">Sair</button>
+  </div>
+
   <div class="tabs">
     <button type="button" class="tab-btn active" id="tab-novo">Novo Registro</button>
     <button type="button" class="tab-btn" id="tab-historico">Histórico</button>
@@ -567,7 +688,7 @@
 
         <div class="field">
           <label for="funcionario">Nome do Funcionário</label>
-          <input type="text" id="funcionario" name="funcionario" placeholder="Quem está registrando" required>
+          <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
         </div>
 
         <div class="row-2">
@@ -702,6 +823,8 @@
     </div>
 
   </div>
+
+  </div><!-- /app-content -->
 </main>
 
 <footer>
@@ -710,12 +833,115 @@
   <span style="opacity:.8;">Desenvolvido com apoio de IA por Luiz Fernando, Analista de Dados</span>
 </footer>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script>
   // ============ CONFIGURAÇÃO ============
   // Cole aqui a URL da sua implantação (Web App) do Google Apps Script.
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7FQcsAuyrJ0Y7XJtoOKkz8rGlu88wcdDTvHyolEJ41a2kmjz6ZaX8YrxmsOYnvho7/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC2m1hts8B7NDEMhwKcdXjuotOJmDJJU8VhuJSskZIdpj--Hh2KPxi9uLMtng_zRG7/exec";
+  // Cole aqui o Client ID gerado no Google Cloud Console (veja o LEIA-ME, Parte 8).
+  const GOOGLE_CLIENT_ID = "779709035083-4umu9n4uk47rs6bo8lq5eelasvl0k9vg.apps.googleusercontent.com";
   // =======================================
+
+  // ============ LOGIN COM GOOGLE ============
+  const CHAVE_LOGIN = 'faltas-energia-login';
+  let usuarioLogado = null; // { nome, email, foto, idToken }
+
+  function decodificarJWT(token) {
+    const payload = token.split('.')[1];
+    const json = decodeURIComponent(atob(payload.replace(/-/g,'+').replace(/_/g,'/'))
+      .split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(json);
+  }
+
+  function mostrarApp(usuario) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+    document.getElementById('user-nome').textContent = usuario.nome;
+    document.getElementById('user-email').textContent = usuario.email;
+    document.getElementById('user-avatar').src = usuario.foto || '';
+    const campoFuncionario = document.getElementById('funcionario');
+    if (campoFuncionario) campoFuncionario.value = usuario.nome;
+  }
+
+  function mostrarLogin() {
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('app-content').style.display = 'none';
+  }
+
+  function handleCredentialResponse(response) {
+    const loadingEl = document.getElementById('login-loading');
+    const errorEl = document.getElementById('login-error');
+    errorEl.classList.remove('show');
+    loadingEl.classList.add('show');
+
+    try {
+      const dados = decodificarJWT(response.credential);
+      usuarioLogado = {
+        nome: dados.name || dados.email,
+        email: dados.email,
+        foto: dados.picture || '',
+        idToken: response.credential,
+        exp: dados.exp
+      };
+      localStorage.setItem(CHAVE_LOGIN, JSON.stringify(usuarioLogado));
+      loadingEl.classList.remove('show');
+      mostrarApp(usuarioLogado);
+    } catch (err) {
+      loadingEl.classList.remove('show');
+      errorEl.classList.add('show');
+    }
+  }
+
+  function tentarRestaurarSessao() {
+    try {
+      const salvo = localStorage.getItem(CHAVE_LOGIN);
+      if (!salvo) return false;
+      const usuario = JSON.parse(salvo);
+      // O token do Google expira em ~1h; depois disso pedimos login de novo
+      // (mas para exibir o nome guardado não há problema em reaproveitar).
+      if (usuario.exp && (Date.now() / 1000) > usuario.exp) {
+        localStorage.removeItem(CHAVE_LOGIN);
+        return false;
+      }
+      usuarioLogado = usuario;
+      mostrarApp(usuario);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    localStorage.removeItem(CHAVE_LOGIN);
+    usuarioLogado = null;
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.disableAutoSelect();
+    }
+    mostrarLogin();
+  });
+
+  window.addEventListener('load', () => {
+    if (tentarRestaurarSessao()) return;
+
+    if (GOOGLE_CLIENT_ID.includes('COLE_AQUI')) {
+      document.getElementById('login-error').textContent =
+        '⚠ Configure o GOOGLE_CLIENT_ID no topo do arquivo index.html.';
+      document.getElementById('login-error').classList.add('show');
+      return;
+    }
+
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-btn'),
+        { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 }
+      );
+    }
+  });
 
   const form = document.getElementById('outage-form');
   const breakerBtn = document.getElementById('breaker-btn');
@@ -771,6 +997,9 @@
     statusMsg.textContent = "";
 
     const data = new FormData(form);
+    if (usuarioLogado && usuarioLogado.idToken) {
+      data.append('idToken', usuarioLogado.idToken);
+    }
 
     try{
       if(SCRIPT_URL.includes("COLE_AQUI")){
@@ -852,6 +1081,7 @@
   document.getElementById('new-entry-btn').addEventListener('click', () => {
     form.reset();
     document.getElementById('data').valueAsDate = new Date();
+    if (usuarioLogado) document.getElementById('funcionario').value = usuarioLogado.nome;
     armed = false;
     breakerBtn.classList.remove('on');
     breakerBtn.setAttribute('aria-pressed', 'false');
