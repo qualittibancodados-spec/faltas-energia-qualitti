@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Controle de Faltas de Energia — Qualitti</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C1272D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Faltas de Energia">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -316,6 +327,44 @@
     cursor: pointer;
   }
 
+  .install-banner{
+    display:none;
+    align-items:center;
+    gap: 12px;
+    background: var(--gold-light);
+    border: 1.4px solid var(--gold);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 0 0 18px;
+  }
+  .install-banner.show{ display:flex; }
+  .install-banner .txt{
+    flex:1;
+    font-size: 12.5px;
+    color: var(--red-dark);
+    line-height: 1.4;
+  }
+  .install-banner .txt strong{ display:block; font-size: 13.5px; margin-bottom: 2px; }
+  .install-banner button{
+    flex-shrink:0;
+    border: none;
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: "Poppins", system-ui, sans-serif;
+  }
+  .install-banner .close-x{
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 16px;
+    padding: 4px 6px;
+    font-weight: 400;
+  }
+
   footer{
     text-align:center;
     color: var(--ink-soft);
@@ -345,6 +394,16 @@
 
     <!-- FORM -->
     <div id="form-screen">
+
+      <div id="install-banner" class="install-banner">
+        <div class="txt" id="install-text">
+          <strong>Instale este app no seu celular</strong>
+          Acesse mais rápido, direto da tela inicial.
+        </div>
+        <button id="install-btn" type="button">Instalar</button>
+        <button class="close-x" id="install-close" type="button" aria-label="Fechar">✕</button>
+      </div>
+
       <p class="intro">Preencha os dados abaixo assim que a energia retornar no núcleo. As informações são enviadas direto para a planilha da equipe.</p>
 
       <form id="outage-form">
@@ -526,6 +585,52 @@
       submitBtn.disabled = false;
       submitBtn.textContent = "ENVIAR REGISTRO";
     }
+  });
+
+  // ============ PWA: Service Worker ============
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+
+  // ============ PWA: Prompt de instalação ============
+  const installBanner = document.getElementById('install-banner');
+  const installBtn = document.getElementById('install-btn');
+  const installClose = document.getElementById('install-close');
+  const installText = document.getElementById('install-text');
+  let deferredPrompt = null;
+
+  const dispensado = localStorage.getItem('install-banner-dispensado') === '1'; // pode falhar em modo privado; ok se falhar
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  if (!isStandalone && !dispensado) {
+    if (isIOS) {
+      installText.innerHTML = "<strong>Instale este app no seu iPhone</strong>Toque em Compartilhar (⬆) e depois em 'Adicionar à Tela de Início'.";
+      installBtn.style.display = 'none';
+      installBanner.classList.add('show');
+    } else {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.classList.add('show');
+      });
+    }
+  }
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBanner.classList.remove('show');
+  });
+
+  installClose.addEventListener('click', () => {
+    installBanner.classList.remove('show');
+    try { localStorage.setItem('install-banner-dispensado', '1'); } catch(e) {}
   });
 
   document.getElementById('new-entry-btn').addEventListener('click', () => {
