@@ -1,6 +1,6 @@
 {
-  "name": "Controle de Faltas de Energia - Qualitti",
-  "short_name": "Faltas de Energia",
+  "name": "Qualitti Granjas",
+  "short_name": "Qualitti Granjas",
   "description": "Registro de faltas de energia nos núcleos de produção - Qualitti Alimentos",
   "start_url": "./index.html",
   "scope": "./",

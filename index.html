@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Controle de Faltas de Energia — Qualitti</title>
+<title>Qualitti Granjas</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Faltas de Energia">
+<meta name="apple-mobile-web-app-title" content="Qualitti Granjas">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
 
@@ -656,6 +656,14 @@
           <label for="filtro-busca">Buscar</label>
           <input type="text" id="filtro-busca" placeholder="Funcionário, protocolo...">
         </div>
+        <div class="field">
+          <label for="filtro-de">Período - De</label>
+          <input type="date" id="filtro-de">
+        </div>
+        <div class="field">
+          <label for="filtro-ate">Período - Até</label>
+          <input type="date" id="filtro-ate">
+        </div>
       </div>
 
       <div class="hist-actions">
@@ -926,15 +934,35 @@
     return (parseInt(partes[0], 10) || 0) * 60 + (parseInt(partes[1], 10) || 0);
   }
 
+  // Converte "dd/MM/yyyy" (como vem do backend) para um Date comparável
+  function parseDataBR(str) {
+    if (!str) return null;
+    const partes = String(str).split('/');
+    if (partes.length !== 3) return null;
+    const [d, m, y] = partes.map(Number);
+    return new Date(y, m - 1, d);
+  }
+
   function aplicarFiltrosEExibir() {
     const nucleoFiltro = document.getElementById('filtro-nucleo').value;
     const buscaFiltro = document.getElementById('filtro-busca').value.trim().toLowerCase();
+    const deFiltro = document.getElementById('filtro-de').value;   // yyyy-mm-dd ou ""
+    const ateFiltro = document.getElementById('filtro-ate').value;
+
+    const dataDe = deFiltro ? new Date(deFiltro + 'T00:00:00') : null;
+    const dataAte = ateFiltro ? new Date(ateFiltro + 'T23:59:59') : null;
 
     const filtrados = todosRegistros.filter(r => {
       if (nucleoFiltro && r['Núcleo'] !== nucleoFiltro) return false;
       if (buscaFiltro) {
         const alvo = `${r['Funcionário']||''} ${r['Nº Protocolo']||''} ${r['Observações']||''}`.toLowerCase();
         if (!alvo.includes(buscaFiltro)) return false;
+      }
+      if (dataDe || dataAte) {
+        const dataRegistro = parseDataBR(r['Data']);
+        if (!dataRegistro) return false;
+        if (dataDe && dataRegistro < dataDe) return false;
+        if (dataAte && dataRegistro > dataAte) return false;
       }
       return true;
     });
@@ -988,6 +1016,8 @@
 
   document.getElementById('filtro-nucleo').addEventListener('change', aplicarFiltrosEExibir);
   document.getElementById('filtro-busca').addEventListener('input', aplicarFiltrosEExibir);
+  document.getElementById('filtro-de').addEventListener('change', aplicarFiltrosEExibir);
+  document.getElementById('filtro-ate').addEventListener('change', aplicarFiltrosEExibir);
   document.getElementById('btn-atualizar').addEventListener('click', () => {
     historicoCarregado = false;
     carregarHistorico();
