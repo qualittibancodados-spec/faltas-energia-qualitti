@@ -1103,6 +1103,7 @@
   tabNovo.addEventListener('click', () => {
     tabNovo.classList.add('active');
     tabHistorico.classList.remove('active');
+    document.getElementById('success-screen').classList.remove('show');
     formScreen.style.display = 'block';
     historicoScreen.classList.remove('show');
   });
@@ -1111,6 +1112,7 @@
     tabHistorico.classList.add('active');
     tabNovo.classList.remove('active');
     formScreen.style.display = 'none';
+    document.getElementById('success-screen').classList.remove('show');
     historicoScreen.classList.add('show');
     if (!historicoCarregado) {
       carregarHistorico();
