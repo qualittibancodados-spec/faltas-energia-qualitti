@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Controle de Faltas de Energia — Qualitti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red: #C1272D;
+    --red-dark: #7A1518;
+    --gold: #F2A900;
+    --gold-light: #FCE8B4;
+    --cream: #FFFBF2;
+    --ink: #2B2420;
+    --ink-soft: #6b6058;
+    --success: #1E7A46;
+    --line: #EBDFC8;
+    --shadow: 0 10px 30px rgba(122,21,24,.12);
+    --radius: 16px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Circuit line divider ---------- */
+  .circuit-line{
+    height: 10px;
+    background: var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+  .circuit-line::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image: radial-gradient(circle, var(--red-dark) 2px, transparent 2.5px);
+    background-size: 28px 10px;
+    background-position: 14px 5px;
+    opacity: .35;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    padding: 22px 20px 26px;
+    display:flex;
+    align-items:center;
+    gap: 16px;
+  }
+  header img{
+    height: 52px;
+    width: auto;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.25));
+    flex-shrink: 0;
+  }
+  header .title-block{
+    color: #fff;
+  }
+  header h1{
+    font-family: "Poppins", system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    margin: 0 0 2px;
+    line-height: 1.2;
+  }
+  header p{
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--gold-light);
+    font-weight: 600;
+    letter-spacing: .3px;
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px 18px 120px;
+  }
+
+  .card{
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    padding: 22px 20px;
+  }
+
+  .intro{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 0 0 18px;
+  }
+
+  .field{
+    margin-bottom: 16px;
+  }
+  .field label{
+    display:block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red-dark);
+    margin-bottom: 6px;
+    letter-spacing: .2px;
+    text-transform: uppercase;
+  }
+  .field .hint{
+    display:block;
+    font-weight: 400;
+    text-transform: none;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    margin-top: 4px;
+  }
+
+  input, select, textarea{
+    width: 100%;
+    font-size: 16px;
+    font-family: inherit;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.6px solid var(--line);
+    background: var(--cream);
+    color: var(--ink);
+    transition: border-color .15s, background .15s;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline: none;
+    border-color: var(--gold);
+    background: #fff;
+  }
+  select{
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='%237A1518' d='M5.5 7l4.5 5 4.5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 38px;
+  }
+  textarea{
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .row-2{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .duration-preview{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: var(--gold-light);
+    border: 1.4px dashed var(--gold);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--red-dark);
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .duration-preview .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--red);
+    flex-shrink:0;
+  }
+  .duration-preview.hidden{ display:none; }
+
+  /* ---------- Breaker-switch submit button ---------- */
+  .breaker-wrap{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    background: var(--red-dark);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 6px;
+  }
+  .breaker-label{
+    color: var(--gold-light);
+    font-family: "Poppins", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+    line-height: 1.3;
+  }
+  button.breaker{
+    position: relative;
+    width: 72px;
+    height: 40px;
+    border-radius: 999px;
+    border: none;
+    background: #5c1012;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.4);
+  }
+  button.breaker .knob{
+    position:absolute;
+    top: 3px; left: 3px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    box-shadow: 0 2px 5px rgba(0,0,0,.35);
+    display:flex; align-items:center; justify-content:center;
+    transition: left .2s ease;
+  }
+  button.breaker .knob svg{ width:16px; height:16px; }
+  button.breaker.on .knob{ left: 35px; }
+  button.breaker:disabled{ opacity: .6; cursor: default; }
+
+  .submit-full{
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: var(--gold);
+    color: var(--red-dark);
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: .3px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(242,169,0,.35);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .submit-full:active{ transform: translateY(1px); }
+  .submit-full:disabled{
+    background: #d9c8a0;
+    color: #8a7a55;
+    box-shadow: none;
+    cursor: default;
+  }
+
+  .status-msg{
+    margin-top: 14px;
+    font-size: 13px;
+    text-align:center;
+    display:none;
+  }
+  .status-msg.show{ display:block; }
+  .status-msg.error{ color: var(--red); font-weight: 700; }
+
+  /* ---------- Success screen ---------- */
+  .success-screen{
+    display:none;
+    text-align:center;
+    padding: 30px 10px 10px;
+  }
+  .success-screen.show{ display:block; }
+  .success-screen .check{
+    width: 74px; height:74px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--success);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 20px rgba(30,122,70,.3);
+  }
+  .success-screen .check svg{ width:36px; height:36px; }
+  .success-screen h2{
+    font-family: "Poppins", system-ui, sans-serif;
+    color: var(--red-dark);
+    font-size: 19px;
+    margin: 0 0 8px;
+  }
+  .success-screen p{
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    margin: 0 0 22px;
+    line-height: 1.5;
+  }
+  .success-screen .summary{
+    text-align:left;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    font-size: 13px;
+  }
+  .success-screen .summary div{
+    display:flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .success-screen .summary div:last-child{ border-bottom: none; }
+  .success-screen .summary span:first-child{ color: var(--ink-soft); }
+  .success-screen .summary span:last-child{ font-weight: 700; text-align: right; }
+
+  .btn-secondary{
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1.8px solid var(--red);
+    background: #fff;
+    color: var(--red);
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+
+  footer{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    padding: 18px;
+  }
+
+  @media (max-width: 400px){
+    header h1{ font-size: 17px; }
+    .row-2{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Qualitti Alimentos">
+  <div class="title-block">
+    <h1>Controle de Faltas de Energia</h1>
+    <p>Núcleos de Produção</p>
+  </div>
+</header>
+<div class="circuit-line"></div>
+
+<main>
+  <div class="card">
+
+    <!-- FORM -->
+    <div id="form-screen">
+      <p class="intro">Preencha os dados abaixo assim que a energia retornar no núcleo. As informações são enviadas direto para a planilha da equipe.</p>
+
+      <form id="outage-form">
+        <div class="field">
+          <label for="nucleo">Núcleo</label>
+          <select id="nucleo" name="nucleo" required>
+            <option value="" disabled selected>Selecione o núcleo</option>
+            <option>Aeroporto</option>
+            <option>Paraiso 1</option>
+            <option>Paraiso 2</option>
+            <option>Paraiso 3</option>
+            <option>Paraiso 4</option>
+            <option>Santa Rosa</option>
+            <option>Vauzinho</option>
+            <option>Flamboyant</option>
+            <option>Aroeira</option>
+            <option>Engopa</option>
+            <option>Vinagre 1</option>
+            <option>Vinagre 2</option>
+            <option>Vinagre 3</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="funcionario">Nome do Funcionário</label>
+          <input type="text" id="funcionario" name="funcionario" placeholder="Quem está registrando" required>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="data">Data</label>
+            <input type="date" id="data" name="data" required>
+          </div>
+          <div class="field">
+            <label for="protocolo">Nº Protocolo</label>
+            <input type="text" id="protocolo" name="protocolo" placeholder="Ex: PR-000123">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="inicio">Horário Início</label>
+            <input type="time" id="inicio" name="inicio" required>
+          </div>
+          <div class="field">
+            <label for="retorno">Horário Retorno</label>
+            <input type="time" id="retorno" name="retorno" required>
+          </div>
+        </div>
+
+        <div id="duration-preview" class="duration-preview hidden">
+          <span class="dot"></span>
+          <span id="duration-text">Duração da falta: —</span>
+        </div>
+
+        <div class="field">
+          <label for="observacoes">Observações <span class="hint" style="display:inline;text-transform:none;">(opcional)</span></label>
+          <textarea id="observacoes" name="observacoes" placeholder="Motivo da falta, ações tomadas, etc."></textarea>
+        </div>
+
+        <div class="breaker-wrap">
+          <div class="breaker-label">Ligue a chave para<br>enviar o registro</div>
+          <button type="button" id="breaker-btn" class="breaker" aria-pressed="false" aria-label="Confirmar e enviar registro">
+            <span class="knob">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v8" stroke="#7A1518" stroke-width="2.4" stroke-linecap="round"/><path d="M6 6.5a7 7 0 1 0 12 0" stroke="#7A1518" stroke-width="2.4" stroke-linecap="round"/></svg>
+            </span>
+          </button>
+        </div>
+
+        <button type="submit" id="submit-btn" class="submit-full" disabled>ENVIAR REGISTRO</button>
+
+        <div id="status-msg" class="status-msg"></div>
+      </form>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="success-screen" class="success-screen">
+      <div class="check">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Registrado com sucesso!</h2>
+      <p>O lançamento foi salvo na planilha da equipe.</p>
+      <div class="summary" id="summary-box"></div>
+      <button class="btn-secondary" id="new-entry-btn">Registrar outra ocorrência</button>
+    </div>
+
+  </div>
+</main>
+
+<footer>Qualitti Alimentos — Controle interno de faltas de energia nos núcleos de produção</footer>
+
+<script>
+  // ============ CONFIGURAÇÃO ============
+  // Cole aqui a URL da sua implantação (Web App) do Google Apps Script.
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZdG5BdetAFcRfyHxxhRMzjBt7kIjVKd5_6_DS-_qD4o2zQYDrZDOp9y3PiXk8qFLN/exec";
+  // =======================================
+
+  const form = document.getElementById('outage-form');
+  const breakerBtn = document.getElementById('breaker-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  const statusMsg = document.getElementById('status-msg');
+  const durationBox = document.getElementById('duration-preview');
+  const durationText = document.getElementById('duration-text');
+
+  // Default date = hoje
+  document.getElementById('data').valueAsDate = new Date();
+
+  // Breaker toggle arms the submit button
+  let armed = false;
+  breakerBtn.addEventListener('click', () => {
+    armed = !armed;
+    breakerBtn.classList.toggle('on', armed);
+    breakerBtn.setAttribute('aria-pressed', armed);
+    submitBtn.disabled = !armed;
+  });
+
+  function calcDuration(inicio, retorno){
+    if(!inicio || !retorno) return null;
+    const [h1,m1] = inicio.split(':').map(Number);
+    const [h2,m2] = retorno.split(':').map(Number);
+    let diff = (h2*60+m2) - (h1*60+m1);
+    if(diff < 0) diff += 24*60;
+    const hh = Math.floor(diff/60);
+    const mm = diff % 60;
+    return `${hh}h ${String(mm).padStart(2,'0')}min`;
+  }
+
+  function updateDurationPreview(){
+    const inicio = document.getElementById('inicio').value;
+    const retorno = document.getElementById('retorno').value;
+    const d = calcDuration(inicio, retorno);
+    if(d){
+      durationText.textContent = `Duração da falta: ${d}`;
+      durationBox.classList.remove('hidden');
+    } else {
+      durationBox.classList.add('hidden');
+    }
+  }
+  document.getElementById('inicio').addEventListener('input', updateDurationPreview);
+  document.getElementById('retorno').addEventListener('input', updateDurationPreview);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!armed) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "ENVIANDO...";
+    statusMsg.className = "status-msg";
+    statusMsg.textContent = "";
+
+    const data = new FormData(form);
+
+    try{
+      if(SCRIPT_URL.includes("COLE_AQUI")){
+        throw new Error("CONFIG");
+      }
+      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      // Monta resumo pra tela de sucesso
+      const summaryBox = document.getElementById('summary-box');
+      summaryBox.innerHTML = `
+        <div><span>Núcleo</span><span>${data.get('nucleo')}</span></div>
+        <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
+        <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
+        <div><span>Início → Retorno</span><span>${data.get('inicio')} → ${data.get('retorno')}</span></div>
+        <div><span>Duração</span><span>${calcDuration(data.get('inicio'), data.get('retorno')) || '-'}</span></div>
+      `;
+
+      document.getElementById('form-screen').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+
+    } catch(err){
+      statusMsg.classList.add('show', 'error');
+      if(err.message === "CONFIG"){
+        statusMsg.textContent = "⚠ O sistema ainda não está conectado à planilha. Configure a SCRIPT_URL no arquivo index.html.";
+      } else {
+        statusMsg.textContent = "Não foi possível enviar. Verifique sua internet e tente novamente.";
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = "ENVIAR REGISTRO";
+    }
+  });
+
+  document.getElementById('new-entry-btn').addEventListener('click', () => {
+    form.reset();
+    document.getElementById('data').valueAsDate = new Date();
+    armed = false;
+    breakerBtn.classList.remove('on');
+    breakerBtn.setAttribute('aria-pressed', 'false');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "ENVIAR REGISTRO";
+    durationBox.classList.add('hidden');
+    document.getElementById('success-screen').classList.remove('show');
+    document.getElementById('form-screen').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>
