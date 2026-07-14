@@ -42,21 +42,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ---------- Circuit line divider ---------- */
+  /* ---------- Gold divider line ---------- */
   .circuit-line{
     height: 10px;
     background: var(--gold);
-    position: relative;
-    overflow: hidden;
-  }
-  .circuit-line::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image: radial-gradient(circle, var(--red-dark) 2px, transparent 2.5px);
-    background-size: 28px 10px;
-    background-position: 14px 5px;
-    opacity: .35;
   }
 
   /* ---------- Header ---------- */
@@ -97,6 +86,149 @@
     max-width: 560px;
     margin: 0 auto;
     padding: 24px 18px 120px;
+  }
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex;
+    gap: 6px;
+    background: var(--gold-light);
+    border-radius: 12px;
+    padding: 5px;
+    margin-bottom: 16px;
+  }
+  .tab-btn{
+    flex:1;
+    border: none;
+    background: transparent;
+    padding: 11px 10px;
+    border-radius: 9px;
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--red-dark);
+    cursor: pointer;
+    opacity: .6;
+    transition: background .15s, opacity .15s;
+  }
+  .tab-btn.active{
+    background: #fff;
+    opacity: 1;
+    box-shadow: 0 3px 8px rgba(122,21,24,.15);
+  }
+
+  /* ---------- Histórico screen ---------- */
+  #historico-screen{ display:none; }
+  #historico-screen.show{ display:block; }
+
+  .hist-filtros{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .hist-filtros .field{ margin-bottom: 0; }
+  .hist-filtros .full{ grid-column: 1 / -1; }
+
+  .hist-actions{
+    display:flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .btn-export{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    background: var(--success);
+    color:#fff;
+    border:none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor:pointer;
+  }
+  .btn-export:disabled{ opacity:.5; cursor:default; }
+  .btn-export svg{ width:16px; height:16px; }
+
+  .btn-refresh{
+    flex-shrink:0;
+    background: var(--cream);
+    border: 1.6px solid var(--line);
+    border-radius: 10px;
+    width: 44px;
+    color: var(--red-dark);
+    cursor:pointer;
+    font-size:16px;
+  }
+
+  .hist-summary{
+    display:flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .hist-summary .box{
+    flex:1;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align:center;
+  }
+  .hist-summary .box .num{
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--red-dark);
+    display:block;
+  }
+  .hist-summary .box .lbl{
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+
+  .hist-table-wrap{
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  table.hist-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 640px;
+  }
+  table.hist-table th{
+    background: var(--red-dark);
+    color:#fff;
+    padding: 9px 8px;
+    text-align:left;
+    font-weight:700;
+    white-space:nowrap;
+    position: sticky;
+    top:0;
+  }
+  table.hist-table td{
+    padding: 8px;
+    border-top: 1px solid var(--line);
+    white-space:nowrap;
+  }
+  table.hist-table tr:nth-child(even) td{ background: var(--cream); }
+  table.hist-table td.obs-cell{
+    white-space: normal;
+    min-width: 140px;
+  }
+
+  .hist-empty, .hist-loading{
+    text-align:center;
+    padding: 30px 10px;
+    color: var(--ink-soft);
+    font-size: 13px;
   }
 
   .card{
@@ -370,6 +502,7 @@
     color: var(--ink-soft);
     font-size: 11.5px;
     padding: 18px;
+    line-height: 1.7;
   }
 
   @media (max-width: 400px){
@@ -390,6 +523,11 @@
 <div class="circuit-line"></div>
 
 <main>
+  <div class="tabs">
+    <button type="button" class="tab-btn active" id="tab-novo">Novo Registro</button>
+    <button type="button" class="tab-btn" id="tab-historico">Histórico</button>
+  </div>
+
   <div class="card">
 
     <!-- FORM -->
@@ -490,11 +628,81 @@
       <button class="btn-secondary" id="new-entry-btn">Registrar outra ocorrência</button>
     </div>
 
+    <!-- HISTÓRICO -->
+    <div id="historico-screen">
+      <p class="intro">Consulte os lançamentos já registrados e exporte para Excel sempre que precisar.</p>
+
+      <div class="hist-filtros">
+        <div class="field">
+          <label for="filtro-nucleo">Núcleo</label>
+          <select id="filtro-nucleo">
+            <option value="">Todos os núcleos</option>
+            <option>Aeroporto</option>
+            <option>Paraiso 1</option>
+            <option>Paraiso 2</option>
+            <option>Paraiso 3</option>
+            <option>Paraiso 4</option>
+            <option>Santa Rosa</option>
+            <option>Vauzinho</option>
+            <option>Flamboyant</option>
+            <option>Aroeira</option>
+            <option>Engopa</option>
+            <option>Vinagre 1</option>
+            <option>Vinagre 2</option>
+            <option>Vinagre 3</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filtro-busca">Buscar</label>
+          <input type="text" id="filtro-busca" placeholder="Funcionário, protocolo...">
+        </div>
+      </div>
+
+      <div class="hist-actions">
+        <button class="btn-export" id="btn-exportar" disabled>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Exportar para Excel
+        </button>
+        <button class="btn-refresh" id="btn-atualizar" title="Atualizar lista">⟳</button>
+      </div>
+
+      <div class="hist-summary">
+        <div class="box">
+          <span class="num" id="sum-total">–</span>
+          <span class="lbl">Registros</span>
+        </div>
+        <div class="box">
+          <span class="num" id="sum-duracao">–</span>
+          <span class="lbl">Duração total</span>
+        </div>
+      </div>
+
+      <div id="hist-loading" class="hist-loading">Carregando lançamentos...</div>
+      <div id="hist-empty" class="hist-empty" style="display:none;">Nenhum lançamento encontrado.</div>
+
+      <div class="hist-table-wrap" id="hist-table-wrap" style="display:none;">
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>Núcleo</th><th>Data</th><th>Protocolo</th><th>Início</th>
+              <th>Retorno</th><th>Duração</th><th>Funcionário</th><th>Observações</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </main>
 
-<footer>Qualitti Alimentos — Controle interno de faltas de energia nos núcleos de produção</footer>
+<footer>
+  Qualitti Alimentos — Controle interno de faltas de energia nos núcleos de produção
+  <br>
+  <span style="opacity:.8;">Desenvolvido com apoio de IA por Luiz Fernando, Analista de Dados</span>
+</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script>
   // ============ CONFIGURAÇÃO ============
   // Cole aqui a URL da sua implantação (Web App) do Google Apps Script.
@@ -644,6 +852,248 @@
     durationBox.classList.add('hidden');
     document.getElementById('success-screen').classList.remove('show');
     document.getElementById('form-screen').style.display = 'block';
+  });
+
+  // ============ ABAS (Novo Registro / Histórico) ============
+  const tabNovo = document.getElementById('tab-novo');
+  const tabHistorico = document.getElementById('tab-historico');
+  const formScreen = document.getElementById('form-screen');
+  const historicoScreen = document.getElementById('historico-screen');
+
+  let historicoCarregado = false;
+
+  tabNovo.addEventListener('click', () => {
+    tabNovo.classList.add('active');
+    tabHistorico.classList.remove('active');
+    formScreen.style.display = 'block';
+    historicoScreen.classList.remove('show');
+  });
+
+  tabHistorico.addEventListener('click', () => {
+    tabHistorico.classList.add('active');
+    tabNovo.classList.remove('active');
+    formScreen.style.display = 'none';
+    historicoScreen.classList.add('show');
+    if (!historicoCarregado) {
+      carregarHistorico();
+    }
+  });
+
+  // ============ HISTÓRICO: carregar dados da planilha ============
+  let todosRegistros = [];
+
+  async function carregarHistorico() {
+    const loadingEl = document.getElementById('hist-loading');
+    const emptyEl = document.getElementById('hist-empty');
+    const tableWrap = document.getElementById('hist-table-wrap');
+    const exportBtn = document.getElementById('btn-exportar');
+
+    loadingEl.style.display = 'block';
+    loadingEl.textContent = 'Carregando lançamentos...';
+    emptyEl.style.display = 'none';
+    tableWrap.style.display = 'none';
+    exportBtn.disabled = true;
+
+    if (SCRIPT_URL.includes("COLE_AQUI")) {
+      loadingEl.textContent = "⚠ Configure a SCRIPT_URL no topo do arquivo para carregar o histórico.";
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${SCRIPT_URL}?action=listar`);
+      const json = await resp.json();
+      if (json.status !== 'ok') throw new Error(json.mensagem || 'Erro ao carregar');
+
+      todosRegistros = json.registros || [];
+      historicoCarregado = true;
+      aplicarFiltrosEExibir();
+
+    } catch (err) {
+      loadingEl.textContent = "Não foi possível carregar o histórico. Verifique sua internet e tente novamente.";
+    }
+  }
+
+  function minutosParaTexto(min) {
+    const hh = Math.floor(min / 60);
+    const mm = min % 60;
+    return `${hh}h ${String(mm).padStart(2, '0')}min`;
+  }
+
+  function duracaoParaMinutos(duracaoStr) {
+    if (!duracaoStr) return 0;
+    const partes = String(duracaoStr).split(':');
+    if (partes.length < 2) return 0;
+    return (parseInt(partes[0], 10) || 0) * 60 + (parseInt(partes[1], 10) || 0);
+  }
+
+  function aplicarFiltrosEExibir() {
+    const nucleoFiltro = document.getElementById('filtro-nucleo').value;
+    const buscaFiltro = document.getElementById('filtro-busca').value.trim().toLowerCase();
+
+    const filtrados = todosRegistros.filter(r => {
+      if (nucleoFiltro && r['Núcleo'] !== nucleoFiltro) return false;
+      if (buscaFiltro) {
+        const alvo = `${r['Funcionário']||''} ${r['Nº Protocolo']||''} ${r['Observações']||''}`.toLowerCase();
+        if (!alvo.includes(buscaFiltro)) return false;
+      }
+      return true;
+    });
+
+    renderizarTabela(filtrados);
+  }
+
+  function renderizarTabela(registros) {
+    const loadingEl = document.getElementById('hist-loading');
+    const emptyEl = document.getElementById('hist-empty');
+    const tableWrap = document.getElementById('hist-table-wrap');
+    const tbody = document.getElementById('hist-tbody');
+    const exportBtn = document.getElementById('btn-exportar');
+
+    loadingEl.style.display = 'none';
+
+    if (registros.length === 0) {
+      emptyEl.style.display = 'block';
+      tableWrap.style.display = 'none';
+      exportBtn.disabled = true;
+      document.getElementById('sum-total').textContent = '0';
+      document.getElementById('sum-duracao').textContent = '0h 00min';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    tableWrap.style.display = 'block';
+    exportBtn.disabled = false;
+
+    tbody.innerHTML = registros.map(r => `
+      <tr>
+        <td>${r['Núcleo'] || ''}</td>
+        <td>${r['Data'] || ''}</td>
+        <td>${r['Nº Protocolo'] || ''}</td>
+        <td>${r['Horário Início'] || ''}</td>
+        <td>${r['Horário Retorno'] || ''}</td>
+        <td>${r['Duração'] || ''}</td>
+        <td>${r['Funcionário'] || ''}</td>
+        <td class="obs-cell">${r['Observações'] || ''}</td>
+      </tr>
+    `).join('');
+
+    const totalMin = registros.reduce((acc, r) => acc + duracaoParaMinutos(r['Duração']), 0);
+    document.getElementById('sum-total').textContent = registros.length;
+    document.getElementById('sum-duracao').textContent = minutosParaTexto(totalMin);
+
+    // guarda a lista filtrada atual pra exportação
+    tbody.dataset.registrosAtuais = 'ok';
+    window.__registrosFiltradosAtuais = registros;
+  }
+
+  document.getElementById('filtro-nucleo').addEventListener('change', aplicarFiltrosEExibir);
+  document.getElementById('filtro-busca').addEventListener('input', aplicarFiltrosEExibir);
+  document.getElementById('btn-atualizar').addEventListener('click', () => {
+    historicoCarregado = false;
+    carregarHistorico();
+  });
+
+  // ============ EXPORTAR PARA EXCEL (.xlsx formatado) ============
+  document.getElementById('btn-exportar').addEventListener('click', async () => {
+    const registros = window.__registrosFiltradosAtuais || [];
+    if (registros.length === 0) return;
+
+    const btn = document.getElementById('btn-exportar');
+    const textoOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = "Gerando arquivo...";
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "Qualitti Alimentos";
+      workbook.created = new Date();
+
+      const sheet = workbook.addWorksheet("Faltas de Energia", {
+        views: [{ state: 'frozen', ySplit: 1 }]
+      });
+
+      const colunas = [
+        { header: "Núcleo", key: "nucleo", width: 16 },
+        { header: "Data", key: "data", width: 12 },
+        { header: "Nº Protocolo", key: "protocolo", width: 16 },
+        { header: "Horário Início", key: "inicio", width: 14 },
+        { header: "Horário Retorno", key: "retorno", width: 15 },
+        { header: "Duração", key: "duracao", width: 12 },
+        { header: "Funcionário", key: "funcionario", width: 22 },
+        { header: "Observações", key: "observacoes", width: 40 },
+      ];
+      sheet.columns = colunas;
+
+      registros.forEach(r => {
+        sheet.addRow({
+          nucleo: r['Núcleo'] || '',
+          data: r['Data'] || '',
+          protocolo: r['Nº Protocolo'] || '',
+          inicio: r['Horário Início'] || '',
+          retorno: r['Horário Retorno'] || '',
+          duracao: r['Duração'] || '',
+          funcionario: r['Funcionário'] || '',
+          observacoes: r['Observações'] || '',
+        });
+      });
+
+      // Estilo do cabeçalho
+      const headerRow = sheet.getRow(1);
+      headerRow.eachCell(cell => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8C1D1F' } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD9A400' } },
+          bottom: { style: 'thin', color: { argb: 'FFD9A400' } },
+          left: { style: 'thin', color: { argb: 'FFD9A400' } },
+          right: { style: 'thin', color: { argb: 'FFD9A400' } },
+        };
+      });
+      headerRow.height = 22;
+
+      // Zebra + bordas nas linhas de dados
+      sheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const bg = rowNumber % 2 === 0 ? 'FFFFF8EC' : 'FFFFFFFF';
+        row.eachCell({ includeEmpty: true }, cell => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFEBDFC8' } },
+            bottom: { style: 'thin', color: { argb: 'FFEBDFC8' } },
+            left: { style: 'thin', color: { argb: 'FFEBDFC8' } },
+            right: { style: 'thin', color: { argb: 'FFEBDFC8' } },
+          };
+          cell.alignment = { vertical: 'middle' };
+        });
+      });
+
+      // Linha de resumo no rodapé
+      const totalMin = registros.reduce((acc, r) => acc + duracaoParaMinutos(r['Duração']), 0);
+      sheet.addRow([]);
+      const resumoRow = sheet.addRow([`Total de registros: ${registros.length}`, '', '', '', '', `Duração total: ${minutosParaTexto(totalMin)}`]);
+      resumoRow.font = { italic: true, color: { argb: 'FF6B605' } };
+
+      sheet.autoFilter = { from: 'A1', to: `H1` };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const hoje = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `Faltas_Energia_Qualitti_${hoje}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+    } catch (err) {
+      alert("Não foi possível gerar o arquivo Excel. Tente novamente.");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = textoOriginal;
+    }
   });
 </script>
 
