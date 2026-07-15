@@ -297,7 +297,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
-    min-width: 640px;
+    min-width: 820px;
   }
   table.hist-table th{
     background: var(--red-dark);
@@ -687,6 +687,11 @@
         </div>
 
         <div class="field">
+          <label for="unidadeConsumidora">Unidade Consumidora</label>
+          <input type="text" id="unidadeConsumidora" name="unidadeConsumidora" placeholder="Nº da Unidade Consumidora" required>
+        </div>
+
+        <div class="field">
           <label for="funcionario">Nome do Funcionário</label>
           <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
         </div>
@@ -716,6 +721,11 @@
         <div id="duration-preview" class="duration-preview hidden">
           <span class="dot"></span>
           <span id="duration-text">Duração da falta: —</span>
+        </div>
+
+        <div class="field">
+          <label for="consumoDiesel">Consumo de Óleo Diesel (litros)</label>
+          <input type="number" id="consumoDiesel" name="consumoDiesel" placeholder="Ex: 12,5" step="0.1" min="0" inputmode="decimal" required>
         </div>
 
         <div class="field">
@@ -813,8 +823,8 @@
         <table class="hist-table">
           <thead>
             <tr>
-              <th>Núcleo</th><th>Data</th><th>Protocolo</th><th>Início</th>
-              <th>Retorno</th><th>Duração</th><th>Funcionário</th><th>Observações</th>
+              <th>Núcleo</th><th>Unidade Consumidora</th><th>Data</th><th>Protocolo</th><th>Início</th>
+              <th>Retorno</th><th>Duração</th><th>Óleo Diesel (L)</th><th>Funcionário</th><th>Observações</th>
             </tr>
           </thead>
           <tbody id="hist-tbody"></tbody>
@@ -1011,10 +1021,12 @@
       const summaryBox = document.getElementById('summary-box');
       summaryBox.innerHTML = `
         <div><span>Núcleo</span><span>${data.get('nucleo')}</span></div>
+        <div><span>Unidade Consumidora</span><span>${data.get('unidadeConsumidora')}</span></div>
         <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
         <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
         <div><span>Início → Retorno</span><span>${data.get('inicio')} → ${data.get('retorno')}</span></div>
         <div><span>Duração</span><span>${calcDuration(data.get('inicio'), data.get('retorno')) || '-'}</span></div>
+        <div><span>Óleo Diesel</span><span>${data.get('consumoDiesel')} L</span></div>
       `;
 
       document.getElementById('form-screen').style.display = 'none';
@@ -1227,11 +1239,13 @@
     tbody.innerHTML = registros.map(r => `
       <tr>
         <td>${r['Núcleo'] || ''}</td>
+        <td>${r['Unidade Consumidora'] || ''}</td>
         <td>${r['Data'] || ''}</td>
         <td>${r['Nº Protocolo'] || ''}</td>
         <td>${r['Horário Início'] || ''}</td>
         <td>${r['Horário Retorno'] || ''}</td>
         <td>${r['Duração'] || ''}</td>
+        <td>${r['Consumo Óleo Diesel (L)'] || ''}</td>
         <td>${r['Funcionário'] || ''}</td>
         <td class="obs-cell">${r['Observações'] || ''}</td>
       </tr>
@@ -1276,11 +1290,13 @@
 
       const colunas = [
         { header: "Núcleo", key: "nucleo", width: 16 },
+        { header: "Unidade Consumidora", key: "unidadeConsumidora", width: 18 },
         { header: "Data", key: "data", width: 12 },
         { header: "Nº Protocolo", key: "protocolo", width: 16 },
         { header: "Horário Início", key: "inicio", width: 14 },
         { header: "Horário Retorno", key: "retorno", width: 15 },
         { header: "Duração", key: "duracao", width: 12 },
+        { header: "Óleo Diesel (L)", key: "diesel", width: 14 },
         { header: "Funcionário", key: "funcionario", width: 22 },
         { header: "Observações", key: "observacoes", width: 40 },
       ];
@@ -1289,11 +1305,13 @@
       registros.forEach(r => {
         sheet.addRow({
           nucleo: r['Núcleo'] || '',
+          unidadeConsumidora: r['Unidade Consumidora'] || '',
           data: r['Data'] || '',
           protocolo: r['Nº Protocolo'] || '',
           inicio: r['Horário Início'] || '',
           retorno: r['Horário Retorno'] || '',
           duracao: r['Duração'] || '',
+          diesel: r['Consumo Óleo Diesel (L)'] || '',
           funcionario: r['Funcionário'] || '',
           observacoes: r['Observações'] || '',
         });
@@ -1333,10 +1351,10 @@
       // Linha de resumo no rodapé
       const totalMin = registros.reduce((acc, r) => acc + duracaoParaMinutos(r['Duração']), 0);
       sheet.addRow([]);
-      const resumoRow = sheet.addRow([`Total de registros: ${registros.length}`, '', '', '', '', `Duração total: ${minutosParaTexto(totalMin)}`]);
+      const resumoRow = sheet.addRow([`Total de registros: ${registros.length}`, '', '', '', '', '', `Duração total: ${minutosParaTexto(totalMin)}`]);
       resumoRow.font = { italic: true, color: { argb: 'FF6B605' } };
 
-      sheet.autoFilter = { from: 'A1', to: `H1` };
+      sheet.autoFilter = { from: 'A1', to: `J1` };
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
