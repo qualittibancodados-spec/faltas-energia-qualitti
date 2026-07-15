@@ -848,7 +848,7 @@
 <script>
   // ============ CONFIGURAÇÃO ============
   // Cole aqui a URL da sua implantação (Web App) do Google Apps Script.
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzFE1toSyztqRpTMGUuQBDQ-yRCQb4pU4nf8fxcX2SZn4drUEorNe6XTr3ob2eiqfH/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOUwXG93ult7F2pS8AGDpZsxuQjOm6khCnsyJ2GT5yJ6I1J1f45Nz6kTqLmwN-clu9/exec";
   // Cole aqui o Client ID gerado no Google Cloud Console (veja o LEIA-ME, Parte 8).
   const GOOGLE_CLIENT_ID = "779709035083-4umu9n4uk47rs6bo8lq5eelasvl0k9vg.apps.googleusercontent.com";
   // =======================================
@@ -1009,6 +1009,7 @@
     const data = new FormData(form);
     if (usuarioLogado && usuarioLogado.idToken) {
       data.append('idToken', usuarioLogado.idToken);
+      data.append('emailLogin', usuarioLogado.email || '');
     }
 
     try{
