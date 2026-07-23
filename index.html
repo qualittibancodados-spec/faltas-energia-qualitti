@@ -195,16 +195,18 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    gap: 6px;
-    padding: 13px 8px;
+    gap: 4px;
+    padding: 12px 4px;
     border-radius: 12px;
     border: 1.6px solid var(--line);
     background: #fff;
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 800;
-    font-size: 12.5px;
+    font-size: 11px;
     color: var(--ink-soft);
     cursor: pointer;
+    text-align: center;
+    line-height: 1.25;
     transition: background .15s, color .15s, border-color .15s;
   }
   .menu-btn.active{
@@ -677,6 +679,7 @@
   <div class="menu-principal">
     <button type="button" class="menu-btn active" id="menu-faltas">⚡ Falta de Energia</button>
     <button type="button" class="menu-btn" id="menu-ambiencia">🌡️ Ambiência</button>
+    <button type="button" class="menu-btn" id="menu-pintinhos">🐣 Pintinhos</button>
   </div>
 
   <div class="tabs" id="subtabs-faltas">
@@ -825,7 +828,9 @@
           <div class="row-2">
             <div class="field">
               <label for="ambAviario">Aviário</label>
-              <input type="text" id="ambAviario" name="aviario" placeholder="Ex: 1" required>
+              <select id="ambAviario" name="aviario" required disabled>
+                <option value="" selected>Selecione o núcleo primeiro</option>
+              </select>
             </div>
             <div class="field">
               <label for="ambData">Data</label>
@@ -864,6 +869,119 @@
         <p>O registro de ambiência foi salvo na planilha da equipe.</p>
         <div class="summary" id="amb-summary-box"></div>
         <button class="btn-secondary" id="amb-new-entry-btn">Registrar outro</button>
+      </div>
+    </div>
+
+    <!-- QUALIDADE DE PINTINHOS -->
+    <div id="pintinhos-screen" style="display:none;">
+
+      <!-- FORM -->
+      <div id="pintinhos-form-wrap">
+        <p class="intro">Registro de qualidade dos pintinhos no alojamento.</p>
+
+        <form id="pintinhos-form">
+          <div class="row-2">
+            <div class="field">
+              <label for="pintNucleo">Núcleo</label>
+              <select id="pintNucleo" name="nucleo" required>
+                <option value="" disabled selected>Selecione o núcleo</option>
+                <option>Aeroporto</option>
+                <option>Paraiso 1</option>
+                <option>Paraiso 2</option>
+                <option>Paraiso 3</option>
+                <option>Paraiso 4</option>
+                <option>Santa Rosa</option>
+                <option>Vauzinho</option>
+                <option>Flamboyant</option>
+                <option>Aroeira</option>
+                <option>Engopa</option>
+                <option>Vinagre 1</option>
+                <option>Vinagre 2</option>
+                <option>Vinagre 3</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pintAviario">Aviário</label>
+              <select id="pintAviario" name="aviario" required disabled>
+                <option value="" selected>Selecione o núcleo primeiro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="pintData">Data</label>
+            <input type="date" id="pintData" name="data" required>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="pintQuantidade">Quantidade de Pintinhos</label>
+              <input type="number" id="pintQuantidade" name="quantidade" placeholder="Ex: 5000" step="1" min="0" required>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="pintTempGalpao">Temperatura do Galpão (°C)</label>
+              <input type="number" id="pintTempGalpao" name="tempGalpao" placeholder="Ex: 32,5" step="0.1" inputmode="decimal" required>
+            </div>
+            <div class="field">
+              <label for="pintTempCaminhao">Temperatura do Caminhão (°C)</label>
+              <input type="number" id="pintTempCaminhao" name="tempCaminhao" placeholder="Ex: 30,0" step="0.1" inputmode="decimal" required>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:4px;">
+            <label style="font-size:12px; color:var(--red-dark); font-weight:800; text-transform:uppercase; letter-spacing:.3px;">Avaliação de Qualidade — quantidade de pintinhos afetados</label>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="pintTempCloacal">Temp. Cloacal Fora do Padrão</label>
+              <input type="number" id="pintTempCloacal" name="tempCloacal" placeholder="0" step="1" min="0" required>
+            </div>
+            <div class="field">
+              <label for="pintPlumagem">Plumagem Ruim</label>
+              <input type="number" id="pintPlumagem" name="plumagem" placeholder="0" step="1" min="0" required>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="pintDesidratacao">Desidratação</label>
+              <input type="number" id="pintDesidratacao" name="desidratacao" placeholder="0" step="1" min="0" required>
+            </div>
+            <div class="field">
+              <label for="pintUmbigo">Umbigo Aberto</label>
+              <input type="number" id="pintUmbigo" name="umbigo" placeholder="0" step="1" min="0" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="pintHematoma">Hematoma nas Articulações</label>
+            <input type="number" id="pintHematoma" name="hematoma" placeholder="0" step="1" min="0" required>
+          </div>
+
+          <div class="field">
+            <label for="pintFuncionario">Nome do Funcionário</label>
+            <input type="text" id="pintFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+          </div>
+
+          <button type="submit" id="pint-submit-btn" class="submit-full">ENVIAR REGISTRO</button>
+
+          <div id="pint-status-msg" class="status-msg"></div>
+        </form>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="pintinhos-success" class="success-screen">
+        <div class="check">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Registrado com sucesso!</h2>
+        <p>O registro de qualidade de pintinhos foi salvo na planilha da equipe.</p>
+        <div class="summary" id="pint-summary-box"></div>
+        <button class="btn-secondary" id="pint-new-entry-btn">Registrar outro</button>
       </div>
     </div>
 
@@ -982,6 +1100,8 @@
     if (campoFuncionario) campoFuncionario.value = usuario.nome;
     const campoFuncionarioAmb = document.getElementById('ambFuncionario');
     if (campoFuncionarioAmb) campoFuncionarioAmb.value = usuario.nome;
+    const campoFuncionarioPint = document.getElementById('pintFuncionario');
+    if (campoFuncionarioPint) campoFuncionarioPint.value = usuario.nome;
   }
 
   function mostrarLogin() {
@@ -1070,9 +1190,46 @@
   const durationBox = document.getElementById('duration-preview');
   const durationText = document.getElementById('duration-text');
 
+  // ============ MAPA NÚCLEO → AVIÁRIOS (GALPÕES) ============
+  const NUCLEO_AVIARIOS = {
+    "Aeroporto": [11, 12, 13, 14],
+    "Paraiso 1": [15, 16, 17, 18, 19, 20],
+    "Paraiso 2": [21, 22, 23, 24, 25, 26],
+    "Engopa": [27, 28, 29, 30],
+    "Paraiso 3": [31, 32, 33, 34, 35, 36],
+    "Paraiso 4": [37, 38, 39, 40, 41, 42],
+    "Vinagre 1": [43, 44, 45, 46, 47, 48, 49, 50],
+    "Vinagre 3": [51, 52, 53, 54, 55, 56, 57, 58],
+    "Santa Rosa": [59, 60, 61, 62],
+    "Vinagre 2": [63, 64, 65, 66, 67, 68, 69, 70],
+    "Vauzinho": [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86],
+    "Aroeira": [87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106],
+    "Flamboyant": [107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126],
+  };
+
+  function popularAviarios(nucleoSelectId, aviarioSelectId) {
+    const nucleoEl = document.getElementById(nucleoSelectId);
+    const aviarioEl = document.getElementById(aviarioSelectId);
+    nucleoEl.addEventListener('change', () => {
+      const lista = NUCLEO_AVIARIOS[nucleoEl.value] || [];
+      if (lista.length === 0) {
+        aviarioEl.innerHTML = '<option value="" selected>Nenhum aviário encontrado</option>';
+        aviarioEl.disabled = true;
+        return;
+      }
+      aviarioEl.innerHTML = '<option value="" disabled selected>Selecione o aviário</option>' +
+        lista.map(n => `<option value="${n}">Galpão ${n}</option>`).join('');
+      aviarioEl.disabled = false;
+    });
+  }
+
+  popularAviarios('ambNucleo', 'ambAviario');
+  popularAviarios('pintNucleo', 'pintAviario');
+
   // Default date = hoje
   document.getElementById('data').valueAsDate = new Date();
   document.getElementById('ambData').valueAsDate = new Date();
+  document.getElementById('pintData').valueAsDate = new Date();
 
   // Breaker toggle arms the submit button
   let armed = false;
@@ -1245,7 +1402,7 @@
       const summaryBox = document.getElementById('amb-summary-box');
       summaryBox.innerHTML = `
         <div><span>Núcleo</span><span>${data.get('nucleo')}</span></div>
-        <div><span>Aviário</span><span>${data.get('aviario')}</span></div>
+        <div><span>Aviário</span><span>Galpão ${data.get('aviario')}</span></div>
         <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
         <div><span>Temperatura</span><span>${data.get('temperatura')} °C</span></div>
         <div><span>Amônia</span><span>${data.get('amonia')} ppm</span></div>
@@ -1271,15 +1428,88 @@
     ambForm.reset();
     document.getElementById('ambData').valueAsDate = new Date();
     if (usuarioLogado) document.getElementById('ambFuncionario').value = usuarioLogado.nome;
+    const ambAviarioEl = document.getElementById('ambAviario');
+    ambAviarioEl.innerHTML = '<option value="" selected>Selecione o núcleo primeiro</option>';
+    ambAviarioEl.disabled = true;
     ambSubmitBtn.disabled = false;
     ambSubmitBtn.textContent = "ENVIAR REGISTRO";
     document.getElementById('ambiencia-success').classList.remove('show');
     document.getElementById('ambiencia-form-wrap').style.display = 'block';
   });
 
-  // ============ MENU PRINCIPAL (Falta de Energia / Ambiência) ============
+  // ============ FORMULÁRIO DE QUALIDADE DE PINTINHOS ============
+  const pintForm = document.getElementById('pintinhos-form');
+  const pintSubmitBtn = document.getElementById('pint-submit-btn');
+  const pintStatusMsg = document.getElementById('pint-status-msg');
+
+  pintForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    pintSubmitBtn.disabled = true;
+    pintSubmitBtn.textContent = "ENVIANDO...";
+    pintStatusMsg.className = "status-msg";
+    pintStatusMsg.textContent = "";
+
+    const data = new FormData(pintForm);
+    data.append('tipo', 'pintinhos');
+    if (usuarioLogado && usuarioLogado.idToken) {
+      data.append('idToken', usuarioLogado.idToken);
+      data.append('emailLogin', usuarioLogado.email || '');
+    }
+
+    try {
+      if (SCRIPT_URL.includes("COLE_AQUI")) {
+        throw new Error("CONFIG");
+      }
+      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      const summaryBox = document.getElementById('pint-summary-box');
+      summaryBox.innerHTML = `
+        <div><span>Núcleo</span><span>${data.get('nucleo')}</span></div>
+        <div><span>Aviário</span><span>Galpão ${data.get('aviario')}</span></div>
+        <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
+        <div><span>Quantidade de Pintinhos</span><span>${data.get('quantidade')}</span></div>
+        <div><span>Temp. Galpão / Caminhão</span><span>${data.get('tempGalpao')}°C / ${data.get('tempCaminhao')}°C</span></div>
+        <div><span>Temp. Cloacal fora do padrão</span><span>${data.get('tempCloacal')}</span></div>
+        <div><span>Plumagem ruim</span><span>${data.get('plumagem')}</span></div>
+        <div><span>Desidratação</span><span>${data.get('desidratacao')}</span></div>
+        <div><span>Umbigo aberto</span><span>${data.get('umbigo')}</span></div>
+        <div><span>Hematoma articulações</span><span>${data.get('hematoma')}</span></div>
+        <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
+      `;
+
+      document.getElementById('pintinhos-form-wrap').style.display = 'none';
+      document.getElementById('pintinhos-success').classList.add('show');
+
+    } catch (err) {
+      pintStatusMsg.classList.add('show', 'error');
+      if (err.message === "CONFIG") {
+        pintStatusMsg.textContent = "⚠ O sistema ainda não está conectado à planilha. Configure a SCRIPT_URL no arquivo index.html.";
+      } else {
+        pintStatusMsg.textContent = "Não foi possível enviar. Verifique sua internet e tente novamente.";
+      }
+      pintSubmitBtn.disabled = false;
+      pintSubmitBtn.textContent = "ENVIAR REGISTRO";
+    }
+  });
+
+  document.getElementById('pint-new-entry-btn').addEventListener('click', () => {
+    pintForm.reset();
+    document.getElementById('pintData').valueAsDate = new Date();
+    if (usuarioLogado) document.getElementById('pintFuncionario').value = usuarioLogado.nome;
+    const pintAviarioEl = document.getElementById('pintAviario');
+    pintAviarioEl.innerHTML = '<option value="" selected>Selecione o núcleo primeiro</option>';
+    pintAviarioEl.disabled = true;
+    pintSubmitBtn.disabled = false;
+    pintSubmitBtn.textContent = "ENVIAR REGISTRO";
+    document.getElementById('pintinhos-success').classList.remove('show');
+    document.getElementById('pintinhos-form-wrap').style.display = 'block';
+  });
+
+  // ============ MENU PRINCIPAL (Falta de Energia / Ambiência / Pintinhos) ============
   const menuFaltas = document.getElementById('menu-faltas');
   const menuAmbiencia = document.getElementById('menu-ambiencia');
+  const menuPintinhos = document.getElementById('menu-pintinhos');
   const subtabsFaltas = document.getElementById('subtabs-faltas');
 
   // ============ SUB-ABAS (dentro de Falta de Energia: Lançamento / Histórico) ============
@@ -1287,6 +1517,7 @@
   const tabHistorico = document.getElementById('tab-historico');
   const formScreen = document.getElementById('form-screen');
   const ambienciaScreen = document.getElementById('ambiencia-screen');
+  const pintinhosScreen = document.getElementById('pintinhos-screen');
   const historicoScreen = document.getElementById('historico-screen');
 
   let historicoCarregado = false;
@@ -1296,14 +1527,21 @@
     tabHistorico.classList.remove('active');
     formScreen.style.display = 'none';
     ambienciaScreen.style.display = 'none';
+    pintinhosScreen.style.display = 'none';
     historicoScreen.classList.remove('show');
     document.getElementById('success-screen').classList.remove('show');
     document.getElementById('ambiencia-success').classList.remove('show');
+    document.getElementById('pintinhos-success').classList.remove('show');
+  }
+
+  function marcarMenuAtivo(ativo) {
+    menuFaltas.classList.toggle('active', ativo === 'faltas');
+    menuAmbiencia.classList.toggle('active', ativo === 'ambiencia');
+    menuPintinhos.classList.toggle('active', ativo === 'pintinhos');
   }
 
   function abrirModuloFaltas() {
-    menuFaltas.classList.add('active');
-    menuAmbiencia.classList.remove('active');
+    marcarMenuAtivo('faltas');
     subtabsFaltas.style.display = 'flex';
     esconderTudo();
     tabNovo.classList.add('active');
@@ -1311,15 +1549,22 @@
   }
 
   function abrirModuloAmbiencia() {
-    menuAmbiencia.classList.add('active');
-    menuFaltas.classList.remove('active');
+    marcarMenuAtivo('ambiencia');
     subtabsFaltas.style.display = 'none';
     esconderTudo();
     ambienciaScreen.style.display = 'block';
   }
 
+  function abrirModuloPintinhos() {
+    marcarMenuAtivo('pintinhos');
+    subtabsFaltas.style.display = 'none';
+    esconderTudo();
+    pintinhosScreen.style.display = 'block';
+  }
+
   menuFaltas.addEventListener('click', abrirModuloFaltas);
   menuAmbiencia.addEventListener('click', abrirModuloAmbiencia);
+  menuPintinhos.addEventListener('click', abrirModuloPintinhos);
 
   tabNovo.addEventListener('click', () => {
     esconderTudo();
