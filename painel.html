@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
@@ -449,12 +449,17 @@
     `).join('');
 
     const g = config.grafico(regs);
-    if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(document.getElementById('grafico'), {
-      type: g.type,
-      data: { labels: g.labels, datasets: g.datasets },
-      options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
-    });
+    if (typeof Chart === 'undefined') {
+      document.querySelector('.chart-card').innerHTML =
+        '<p style="text-align:center;color:var(--ink-soft);font-size:12.5px;padding-top:140px;">⚠ Não foi possível carregar a biblioteca de gráficos. Verifique sua internet e recarregue a página.</p>';
+    } else {
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(document.getElementById('grafico'), {
+        type: g.type,
+        data: { labels: g.labels, datasets: g.datasets },
+        options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+      });
+    }
 
     if (regs.length === 0) {
       document.getElementById('empty-msg').style.display = 'block';
