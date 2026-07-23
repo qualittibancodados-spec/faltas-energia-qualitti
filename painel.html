@@ -194,7 +194,8 @@
 
     <div class="cards-resumo" id="cards-resumo"></div>
 
-    <div class="chart-card"><canvas id="grafico"></canvas></div>
+    <div id="grafico-legenda" style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:8px;"></div>
+    <div class="chart-card"><canvas id="grafico" role="img" aria-label="Gráfico do módulo selecionado"></canvas></div>
 
     <div id="loading-msg" class="loading-msg">Carregando dados...</div>
     <div id="empty-msg" class="empty-msg" style="display:none;">Nenhum registro encontrado.</div>
@@ -305,37 +306,39 @@
   const MODULOS = {
     faltas: {
       label: 'Falta de Energia',
+      cor: '#2a78d6',
       colunas: ['Núcleo','Unidade Consumidora','Data','Nº Protocolo','Horário Início','Horário Retorno','Duração','Consumo Óleo Diesel (L)','Funcionário','Observações'],
       resumo: (regs) => {
         const totalMin = regs.reduce((a,r)=>a+duracaoParaMinutos(r['Duração']),0);
         const totalDiesel = regs.reduce((a,r)=>a+(parseFloat(r['Consumo Óleo Diesel (L)'])||0),0);
         return [
-          { lbl:'Registros', num: regs.length },
-          { lbl:'Duração total', num: minutosParaTexto(totalMin) },
-          { lbl:'Diesel total (L)', num: totalDiesel.toFixed(1) },
+          { lbl:'Registros', valor: regs.length, semTendencia:true, formato:v=>v },
+          { lbl:'Duração total', valor: totalMin, formato:v=>minutosParaTexto(v) },
+          { lbl:'Diesel total (L)', valor: totalDiesel, formato:v=>v.toFixed(1) },
         ];
       },
       grafico: (regs) => {
         const porNucleo = {};
         regs.forEach(r => { porNucleo[r['Núcleo']] = (porNucleo[r['Núcleo']]||0) + duracaoParaMinutos(r['Duração'])/60; });
         return {
-          type: 'bar',
+          type: 'bar', sufixo: 'h',
           labels: Object.keys(porNucleo),
-          datasets: [{ label:'Duração total (h)', data: Object.values(porNucleo).map(v=>+v.toFixed(1)), backgroundColor:'#C1272D' }]
+          datasets: [{ data: Object.values(porNucleo).map(v=>+v.toFixed(1)), backgroundColor:'#2a78d6', borderRadius:4, maxBarThickness:26 }]
         };
       }
     },
     ambiencia: {
       label: 'Ambiência',
+      cor: '#1baf7a',
       colunas: ['Núcleo','Aviário','Data','Temperatura (°C)','Nível de Amônia (ppm)','Funcionário','E-mail'],
       resumo: (regs) => {
         const temps = regs.map(r=>parseFloat(r['Temperatura (°C)'])).filter(v=>!isNaN(v));
         const amonias = regs.map(r=>parseFloat(r['Nível de Amônia (ppm)'])).filter(v=>!isNaN(v));
         const media = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
         return [
-          { lbl:'Registros', num: regs.length },
-          { lbl:'Temp. média (°C)', num: media(temps).toFixed(1) },
-          { lbl:'Amônia média (ppm)', num: media(amonias).toFixed(1) },
+          { lbl:'Registros', valor: regs.length, semTendencia:true, formato:v=>v },
+          { lbl:'Temp. média (°C)', valor: media(temps), formato:v=>v.toFixed(1) },
+          { lbl:'Amônia média (ppm)', valor: media(amonias), formato:v=>v.toFixed(1) },
         ];
       },
       grafico: (regs) => {
@@ -349,33 +352,43 @@
         const labels = Object.keys(porNucleo);
         const media = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
         return {
-          type: 'bar',
+          type: 'bar', duplo: ['Temperatura (°C)', 'Amônia (ppm)'],
           labels,
           datasets: [
-            { label:'Temperatura média (°C)', data: labels.map(n=>+media(porNucleo[n].temp).toFixed(1)), backgroundColor:'#C1272D' },
-            { label:'Amônia média (ppm)', data: labels.map(n=>+media(porNucleo[n].amonia).toFixed(1)), backgroundColor:'#F2A900' },
+            { data: labels.map(n=>+media(porNucleo[n].temp).toFixed(1)), backgroundColor:'#1baf7a', borderRadius:4, maxBarThickness:20 },
+            { data: labels.map(n=>+media(porNucleo[n].amonia).toFixed(1)), backgroundColor:'#eda100', borderRadius:4, maxBarThickness:20 },
           ]
         };
       }
     },
     pintinhos: {
       label: 'Pintinhos',
+      cor: '#e34948',
       colunas: ['Núcleo','Aviário','Data','Quantidade de Pintinhos','Temperatura do Galpão (°C)','Temperatura do Caminhão (°C)','Temp. Cloacal Fora do Padrão','Plumagem Ruim','Desidratação','Umbigo Aberto','Hematoma nas Articulações','Funcionário'],
       resumo: (regs) => {
         const soma = campo => regs.reduce((a,r)=>a+(parseFloat(r[campo])||0),0);
+        const totalPintinhos = soma('Quantidade de Pintinhos');
+        const totalProblemas = soma('Temp. Cloacal Fora do Padrão')+soma('Plumagem Ruim')+soma('Desidratação')+soma('Umbigo Aberto')+soma('Hematoma nas Articulações');
+        const pct = totalPintinhos > 0 ? (totalProblemas/totalPintinhos*100) : 0;
         return [
-          { lbl:'Lotes registrados', num: regs.length },
-          { lbl:'Total de pintinhos', num: soma('Quantidade de Pintinhos').toLocaleString('pt-BR') },
-          { lbl:'Total c/ problema', num: (soma('Temp. Cloacal Fora do Padrão')+soma('Plumagem Ruim')+soma('Desidratação')+soma('Umbigo Aberto')+soma('Hematoma nas Articulações')).toFixed(0) },
+          { lbl:'Lotes registrados', valor: regs.length, semTendencia:true, formato:v=>v },
+          { lbl:'Total de pintinhos', valor: totalPintinhos, semTendencia:true, formato:v=>v.toLocaleString('pt-BR') },
+          { lbl:'% com problema', valor: pct, formato:v=>v.toFixed(1)+'%' },
         ];
       },
+      // Cada critério é mostrado como % sobre o total de pintinhos analisados no período/filtro,
+      // já que lotes têm tamanhos diferentes — comparar por percentual é mais justo que por contagem bruta.
       grafico: (regs) => {
         const campos = ['Temp. Cloacal Fora do Padrão','Plumagem Ruim','Desidratação','Umbigo Aberto','Hematoma nas Articulações'];
-        const somas = campos.map(c => regs.reduce((a,r)=>a+(parseFloat(r[c])||0),0));
+        const totalPintinhos = regs.reduce((a,r)=>a+(parseFloat(r['Quantidade de Pintinhos'])||0),0);
+        const percentuais = campos.map(c => {
+          const soma = regs.reduce((a,r)=>a+(parseFloat(r[c])||0),0);
+          return totalPintinhos > 0 ? +(soma/totalPintinhos*100).toFixed(2) : 0;
+        });
         return {
-          type: 'bar',
+          type: 'bar', sufixo: '%',
           labels: campos,
-          datasets: [{ label:'Total de pintinhos afetados', data: somas, backgroundColor:'#7A1518' }]
+          datasets: [{ data: percentuais, backgroundColor:'#e34948', borderRadius:4, maxBarThickness:26 }]
         };
       }
     }
@@ -421,8 +434,11 @@
     const dataAte = ate ? new Date(ate+'T23:59:59') : null;
 
     const todos = dadosPorModulo[moduloAtual] || [];
+
+    function passaNucleo(r) { return !nucleo || r['Núcleo'] === nucleo; }
+
     const filtrados = todos.filter(r => {
-      if (nucleo && r['Núcleo'] !== nucleo) return false;
+      if (!passaNucleo(r)) return false;
       if (dataDe || dataAte) {
         const d = parseDataBR(r['Data']);
         if (!d) return false;
@@ -432,21 +448,70 @@
       return true;
     });
 
-    renderizar(filtrados);
+    // Período anterior de mesma duração, pra comparar tendência (só dá pra calcular
+    // quando os dois filtros de data estão preenchidos).
+    let anteriores = null;
+    if (dataDe && dataAte) {
+      const duracaoDias = Math.round((dataAte - dataDe) / 86400000) + 1;
+      const dataAteAnterior = new Date(dataDe.getTime() - 86400000);
+      const dataDeAnterior = new Date(dataDe.getTime() - duracaoDias * 86400000);
+      anteriores = todos.filter(r => {
+        if (!passaNucleo(r)) return false;
+        const d = parseDataBR(r['Data']);
+        if (!d) return false;
+        return d >= dataDeAnterior && d <= dataAteAnterior;
+      });
+    }
+
+    renderizar(filtrados, anteriores);
   }
 
   document.getElementById('f-nucleo').addEventListener('change', aplicarFiltros);
   document.getElementById('f-de').addEventListener('change', aplicarFiltros);
   document.getElementById('f-ate').addEventListener('change', aplicarFiltros);
 
-  function renderizar(regs) {
+  function calcularTendencia(valorAtual, regsAnteriores, config, lbl) {
+    if (!regsAnteriores) return null;
+    const itemAnterior = config.resumo(regsAnteriores).find(c => c.lbl === lbl);
+    if (!itemAnterior || !itemAnterior.valor) return null;
+    const delta = ((valorAtual - itemAnterior.valor) / itemAnterior.valor) * 100;
+    if (!isFinite(delta)) return null;
+    return delta;
+  }
+
+  function renderizar(regs, regsAnteriores) {
     const config = MODULOS[moduloAtual];
     document.getElementById('loading-msg').style.display = 'none';
 
+    const itens = config.resumo(regs);
     const cardsEl = document.getElementById('cards-resumo');
-    cardsEl.innerHTML = config.resumo(regs).map(c => `
-      <div class="card-resumo"><div class="num">${c.num}</div><div class="lbl">${c.lbl}</div></div>
-    `).join('');
+    cardsEl.innerHTML = itens.map(c => {
+      const delta = c.semTendencia ? null : calcularTendencia(c.valor, regsAnteriores, config, c.lbl);
+      const tendHtml = delta === null ? '' : `
+        <div style="font-size:12px; color:var(--ink-soft); margin-top:4px; display:flex; align-items:center; gap:4px;">
+          <span>${delta >= 0 ? '▲' : '▼'}</span>${Math.abs(delta).toFixed(0)}% vs. período anterior
+        </div>`;
+      return `
+        <div class="card-resumo">
+          <div class="lbl">${c.lbl}</div>
+          <div class="num" style="font-size:26px; margin-top:4px;">${c.formato(c.valor)}</div>
+          ${tendHtml}
+        </div>`;
+    }).join('');
+
+    // Legenda customizada (mais clara que a padrão do Chart.js)
+    const legendaEl = document.getElementById('grafico-legenda');
+    if (config.duplo) {
+      legendaEl.innerHTML = config.duplo.map((nome,i) => `
+        <span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft);">
+          <span style="width:10px;height:10px;border-radius:2px;background:${i===0?config.cor:'#eda100'};"></span>${nome}
+        </span>`).join('');
+    } else {
+      legendaEl.innerHTML = `
+        <span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft);">
+          <span style="width:10px;height:10px;border-radius:2px;background:${config.cor};"></span>${config.label}${config.grafico(regs).sufixo ? ' (' + config.grafico(regs).sufixo + ')' : ''}
+        </span>`;
+    }
 
     const g = config.grafico(regs);
     if (typeof Chart === 'undefined') {
@@ -457,7 +522,17 @@
       chartInstance = new Chart(document.getElementById('grafico'), {
         type: g.type,
         data: { labels: g.labels, datasets: g.datasets },
-        options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins: {
+            legend: { display:false },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.formattedValue}${g.sufixo||''}` } }
+          },
+          scales: {
+            y: { beginAtZero:true, grid:{ color:'#e1e0d9' }, ticks:{ color:'#898781', callback:(v)=>v+(g.sufixo||'') } },
+            x: { grid:{ display:false }, ticks:{ color:'#898781' } }
+          }
+        }
       });
     }
 

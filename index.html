@@ -187,11 +187,17 @@
   /* ---------- Agrupamento de campos ---------- */
   .field-group{
     border: 1.4px solid var(--line);
-    border-radius: 12px;
+    border-left: 4px solid var(--line);
+    border-radius: 10px;
     padding: 14px 14px 4px;
     margin-bottom: 16px;
     background: var(--cream);
   }
+  #form-screen .field-group{ border-left-color: var(--red); }
+  #ambiencia-screen .field-group{ border-left-color: #0F6E56; }
+  #pintinhos-screen .field-group{ border-left-color: #993C1D; }
+  #ambiencia-screen .group-label{ color: #0F6E56; }
+  #pintinhos-screen .group-label{ color: #993C1D; }
   .group-label{
     font-size: 11px;
     font-weight: 800;
@@ -871,33 +877,33 @@
 
           <div class="field-group">
             <div class="group-label" style="margin-bottom:2px;">🔍 Avaliação de Qualidade</div>
-            <p style="font-size:11px; color:var(--ink-soft); margin:0 0 10px;">Quantidade de pintinhos afetados por critério</p>
+            <p style="font-size:11px; color:var(--ink-soft); margin:0 0 10px;">Quantidade de pintinhos afetados por critério — preenchimento opcional</p>
 
             <div class="row-2">
               <div class="field">
                 <label for="pintTempCloacal">Temp. Cloacal Fora do Padrão</label>
-                <input type="number" id="pintTempCloacal" name="tempCloacal" placeholder="0" step="1" min="0" required>
+                <input type="number" id="pintTempCloacal" name="tempCloacal" placeholder="0" step="1" min="0">
               </div>
               <div class="field">
                 <label for="pintPlumagem">Plumagem Ruim</label>
-                <input type="number" id="pintPlumagem" name="plumagem" placeholder="0" step="1" min="0" required>
+                <input type="number" id="pintPlumagem" name="plumagem" placeholder="0" step="1" min="0">
               </div>
             </div>
 
             <div class="row-2">
               <div class="field">
                 <label for="pintDesidratacao">Desidratação</label>
-                <input type="number" id="pintDesidratacao" name="desidratacao" placeholder="0" step="1" min="0" required>
+                <input type="number" id="pintDesidratacao" name="desidratacao" placeholder="0" step="1" min="0">
               </div>
               <div class="field">
                 <label for="pintUmbigo">Umbigo Aberto</label>
-                <input type="number" id="pintUmbigo" name="umbigo" placeholder="0" step="1" min="0" required>
+                <input type="number" id="pintUmbigo" name="umbigo" placeholder="0" step="1" min="0">
               </div>
             </div>
 
             <div class="field">
               <label for="pintHematoma">Hematoma nas Articulações</label>
-              <input type="number" id="pintHematoma" name="hematoma" placeholder="0" step="1" min="0" required>
+              <input type="number" id="pintHematoma" name="hematoma" placeholder="0" step="1" min="0">
             </div>
           </div>
 
