@@ -115,67 +115,37 @@
     color: #a89a7a !important;
   }
 
-  /* ---------- Avatar + menu do usuário (no cabeçalho) ---------- */
+  /* ---------- Avatar + Sair (no cabeçalho) ---------- */
   .avatar-wrap{
-    position: relative;
     flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
   }
   .avatar-btn{
-    width: 34px; height: 34px;
+    width: 46px; height: 46px;
     border-radius: 50%;
     background: var(--gold);
     color: var(--red-dark);
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 800;
-    font-size: 12.5px;
-    border: 2px solid rgba(255,255,255,.5);
-    cursor: pointer;
+    font-size: 15px;
+    border: 2.5px solid rgba(255,255,255,.6);
+    cursor: default;
   }
-  .user-dropdown{
-    display:none;
-    position: absolute;
-    top: 42px;
-    right: 0;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 12px;
-    width: 190px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.18);
-    z-index: 20;
-  }
-  .user-dropdown.show{ display:block; }
-  .user-dropdown .nome{
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--red-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .user-dropdown .email{
-    font-size: 10.5px;
-    color: var(--ink-soft);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 8px;
-  }
-  .user-dropdown .divider{
-    height: 1px;
-    background: var(--line);
-    margin-bottom: 8px;
-  }
-  .user-dropdown button{
-    width: 100%;
+  .avatar-wrap .sair-link{
     background: transparent;
     border: none;
-    color: var(--red);
-    font-size: 12.5px;
+    color: var(--gold-light);
+    font-size: 11px;
     font-weight: 700;
-    text-align: left;
-    padding: 4px 0;
     cursor: pointer;
+    padding: 2px 4px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   /* ---------- Barra de navegação inferior ---------- */
@@ -245,15 +215,33 @@
   }
 
   /* ---------- Agrupamento de campos ---------- */
+  .field-group{
+    border: 1.4px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 14px 4px;
+    margin-bottom: 16px;
+    background: var(--cream);
+  }
   .group-label{
     font-size: 11px;
     font-weight: 800;
     color: var(--red-dark);
     text-transform: uppercase;
     letter-spacing: .4px;
-    margin: 18px 0 8px;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .group-label:first-child{ margin-top: 0; }
+  .field-group .field,
+  .field-group .row-2{
+    margin-bottom: 14px;
+  }
+  .field-group input,
+  .field-group select,
+  .field-group textarea{
+    background: #fff;
+  }
 
 
   /* ---------- Header ---------- */
@@ -272,6 +260,8 @@
   }
   header .title-block{
     color: #fff;
+    flex: 1;
+    min-width: 0;
   }
   header h1{
     font-family: "Poppins", system-ui, sans-serif;
@@ -730,13 +720,8 @@
     <p>Registros de Produção</p>
   </div>
   <div id="avatar-wrap" class="avatar-wrap" style="display:none;">
-    <button type="button" id="avatar-btn" class="avatar-btn">FL</button>
-    <div id="user-dropdown" class="user-dropdown">
-      <div class="nome" id="user-nome">—</div>
-      <div class="email" id="user-email">—</div>
-      <div class="divider"></div>
-      <button type="button" id="btn-logout">Sair</button>
-    </div>
+    <button type="button" id="avatar-btn" class="avatar-btn" title="Usuário logado">FL</button>
+    <button type="button" id="btn-logout" class="sair-link">Sair</button>
   </div>
 </header>
 <div class="circuit-line"></div>
@@ -776,75 +761,83 @@
       <p class="intro">Preencha os dados abaixo assim que a energia retornar no núcleo. As informações são enviadas direto para a planilha da equipe.</p>
 
       <form id="outage-form">
-        <div class="group-label">Localização</div>
-        <div class="field">
-          <label for="nucleo">Núcleo</label>
-          <select id="nucleo" name="nucleo" required>
-            <option value="" disabled selected>Selecione o núcleo</option>
-            <option>Aeroporto</option>
-            <option>Paraiso 1</option>
-            <option>Paraiso 2</option>
-            <option>Paraiso 3</option>
-            <option>Paraiso 4</option>
-            <option>Santa Rosa</option>
-            <option>Vauzinho</option>
-            <option>Flamboyant</option>
-            <option>Aroeira</option>
-            <option>Engopa</option>
-            <option>Vinagre 1</option>
-            <option>Vinagre 2</option>
-            <option>Vinagre 3</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="unidadeConsumidora">Unidade Consumidora</label>
-          <input type="text" id="unidadeConsumidora" name="unidadeConsumidora" placeholder="Nº da Unidade Consumidora" required>
-        </div>
-
-        <div class="group-label">Ocorrência</div>
-        <div class="row-2">
+        <div class="field-group">
+          <div class="group-label">📍 Localização</div>
           <div class="field">
-            <label for="data">Data</label>
-            <input type="date" id="data" name="data" required>
+            <label for="nucleo">Núcleo</label>
+            <select id="nucleo" name="nucleo" required>
+              <option value="" disabled selected>Selecione o núcleo</option>
+              <option>Aeroporto</option>
+              <option>Paraiso 1</option>
+              <option>Paraiso 2</option>
+              <option>Paraiso 3</option>
+              <option>Paraiso 4</option>
+              <option>Santa Rosa</option>
+              <option>Vauzinho</option>
+              <option>Flamboyant</option>
+              <option>Aroeira</option>
+              <option>Engopa</option>
+              <option>Vinagre 1</option>
+              <option>Vinagre 2</option>
+              <option>Vinagre 3</option>
+            </select>
           </div>
+
           <div class="field">
-            <label for="protocolo">Nº Protocolo</label>
-            <input type="text" id="protocolo" name="protocolo" placeholder="Ex: PR-000123">
+            <label for="unidadeConsumidora">Unidade Consumidora</label>
+            <input type="text" id="unidadeConsumidora" name="unidadeConsumidora" placeholder="Nº da Unidade Consumidora" required>
           </div>
         </div>
 
-        <div class="group-label">Horários da falta</div>
-        <div class="row-2">
-          <div class="field">
-            <label for="inicio">Horário Início</label>
-            <input type="time" id="inicio" name="inicio" required>
+        <div class="field-group">
+          <div class="group-label">📅 Ocorrência</div>
+          <div class="row-2">
+            <div class="field">
+              <label for="data">Data</label>
+              <input type="date" id="data" name="data" required>
+            </div>
+            <div class="field">
+              <label for="protocolo">Nº Protocolo</label>
+              <input type="text" id="protocolo" name="protocolo" placeholder="Ex: PR-000123">
+            </div>
           </div>
-          <div class="field">
-            <label for="retorno">Horário Retorno</label>
-            <input type="time" id="retorno" name="retorno" required>
+        </div>
+
+        <div class="field-group">
+          <div class="group-label">⏱️ Horários da falta</div>
+          <div class="row-2">
+            <div class="field">
+              <label for="inicio">Horário Início</label>
+              <input type="time" id="inicio" name="inicio" required>
+            </div>
+            <div class="field">
+              <label for="retorno">Horário Retorno</label>
+              <input type="time" id="retorno" name="retorno" required>
+            </div>
+          </div>
+
+          <div id="duration-preview" class="duration-preview hidden">
+            <span class="dot"></span>
+            <span id="duration-text">Duração da falta: —</span>
           </div>
         </div>
 
-        <div id="duration-preview" class="duration-preview hidden">
-          <span class="dot"></span>
-          <span id="duration-text">Duração da falta: —</span>
-        </div>
+        <div class="field-group">
+          <div class="group-label">📝 Detalhes adicionais</div>
+          <div class="field">
+            <label for="consumoDiesel">Consumo de Óleo Diesel (litros)</label>
+            <input type="number" id="consumoDiesel" name="consumoDiesel" placeholder="Ex: 12,5" step="0.1" min="0" inputmode="decimal" required>
+          </div>
 
-        <div class="group-label">Detalhes adicionais</div>
-        <div class="field">
-          <label for="consumoDiesel">Consumo de Óleo Diesel (litros)</label>
-          <input type="number" id="consumoDiesel" name="consumoDiesel" placeholder="Ex: 12,5" step="0.1" min="0" inputmode="decimal" required>
-        </div>
+          <div class="field">
+            <label for="observacoes">Observações <span class="hint" style="display:inline;text-transform:none;">(opcional)</span></label>
+            <textarea id="observacoes" name="observacoes" placeholder="Motivo da falta, ações tomadas, etc."></textarea>
+          </div>
 
-        <div class="field">
-          <label for="observacoes">Observações <span class="hint" style="display:inline;text-transform:none;">(opcional)</span></label>
-          <textarea id="observacoes" name="observacoes" placeholder="Motivo da falta, ações tomadas, etc."></textarea>
-        </div>
-
-        <div class="field">
-          <label for="funcionario">Nome do Funcionário</label>
-          <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+          <div class="field">
+            <label for="funcionario">Nome do Funcionário</label>
+            <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+          </div>
         </div>
 
         <div class="breaker-wrap">
@@ -881,54 +874,61 @@
         <p class="intro">Registro de temperatura e nível de amônia por aviário.</p>
 
         <form id="ambiencia-form">
-          <div class="group-label">Localização</div>
-          <div class="row-2">
-            <div class="field">
-              <label for="ambNucleo">Núcleo</label>
-              <select id="ambNucleo" name="nucleo" required>
-                <option value="" disabled selected>Selecione o núcleo</option>
-                <option>Aeroporto</option>
-                <option>Paraiso 1</option>
-                <option>Paraiso 2</option>
-                <option>Paraiso 3</option>
-                <option>Paraiso 4</option>
-                <option>Santa Rosa</option>
-                <option>Vauzinho</option>
-                <option>Flamboyant</option>
-                <option>Aroeira</option>
-                <option>Engopa</option>
-                <option>Vinagre 1</option>
-                <option>Vinagre 2</option>
-                <option>Vinagre 3</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="ambAviario">Aviário</label>
-              <select id="ambAviario" name="aviario" required disabled>
-                <option value="" selected>Selecione o núcleo primeiro</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="group-label">Medições</div>
-          <div class="field">
-            <label for="ambData">Data</label>
-            <input type="date" id="ambData" name="data" required>
-          </div>
-          <div class="row-2">
-            <div class="field">
-              <label for="ambTemperatura">Temperatura (°C)</label>
-              <input type="number" id="ambTemperatura" name="temperatura" placeholder="Ex: 28,5" step="0.1" inputmode="decimal" required>
-            </div>
-            <div class="field">
-              <label for="ambAmonia">Nível de Amônia (ppm)</label>
-              <input type="number" id="ambAmonia" name="amonia" placeholder="Ex: 15" step="0.1" inputmode="decimal" required>
+          <div class="field-group">
+            <div class="group-label">📍 Localização</div>
+            <div class="row-2">
+              <div class="field">
+                <label for="ambNucleo">Núcleo</label>
+                <select id="ambNucleo" name="nucleo" required>
+                  <option value="" disabled selected>Selecione o núcleo</option>
+                  <option>Aeroporto</option>
+                  <option>Paraiso 1</option>
+                  <option>Paraiso 2</option>
+                  <option>Paraiso 3</option>
+                  <option>Paraiso 4</option>
+                  <option>Santa Rosa</option>
+                  <option>Vauzinho</option>
+                  <option>Flamboyant</option>
+                  <option>Aroeira</option>
+                  <option>Engopa</option>
+                  <option>Vinagre 1</option>
+                  <option>Vinagre 2</option>
+                  <option>Vinagre 3</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ambAviario">Aviário</label>
+                <select id="ambAviario" name="aviario" required disabled>
+                  <option value="" selected>Selecione o núcleo primeiro</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="field">
-            <label for="ambFuncionario">Nome do Funcionário</label>
-            <input type="text" id="ambFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+          <div class="field-group">
+            <div class="group-label">🌡️ Medições</div>
+            <div class="field">
+              <label for="ambData">Data</label>
+              <input type="date" id="ambData" name="data" required>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="ambTemperatura">Temperatura (°C)</label>
+                <input type="number" id="ambTemperatura" name="temperatura" placeholder="Ex: 28,5" step="0.1" inputmode="decimal" required>
+              </div>
+              <div class="field">
+                <label for="ambAmonia">Nível de Amônia (ppm)</label>
+                <input type="number" id="ambAmonia" name="amonia" placeholder="Ex: 15" step="0.1" inputmode="decimal" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="group-label">👤 Responsável</div>
+            <div class="field">
+              <label for="ambFuncionario">Nome do Funcionário</label>
+              <input type="text" id="ambFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+            </div>
           </div>
 
           <button type="submit" id="amb-submit-btn" class="submit-full">ENVIAR REGISTRO</button>
@@ -957,92 +957,101 @@
         <p class="intro">Registro de qualidade dos pintinhos no alojamento.</p>
 
         <form id="pintinhos-form">
-          <div class="group-label">Localização</div>
-          <div class="row-2">
-            <div class="field">
-              <label for="pintNucleo">Núcleo</label>
-              <select id="pintNucleo" name="nucleo" required>
-                <option value="" disabled selected>Selecione o núcleo</option>
-                <option>Aeroporto</option>
-                <option>Paraiso 1</option>
-                <option>Paraiso 2</option>
-                <option>Paraiso 3</option>
-                <option>Paraiso 4</option>
-                <option>Santa Rosa</option>
-                <option>Vauzinho</option>
-                <option>Flamboyant</option>
-                <option>Aroeira</option>
-                <option>Engopa</option>
-                <option>Vinagre 1</option>
-                <option>Vinagre 2</option>
-                <option>Vinagre 3</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="pintAviario">Aviário</label>
-              <select id="pintAviario" name="aviario" required disabled>
-                <option value="" selected>Selecione o núcleo primeiro</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="group-label">Alojamento</div>
-          <div class="field">
-            <label for="pintData">Data</label>
-            <input type="date" id="pintData" name="data" required>
-          </div>
-
-          <div class="row-2">
-            <div class="field">
-              <label for="pintQuantidade">Quantidade de Pintinhos</label>
-              <input type="number" id="pintQuantidade" name="quantidade" placeholder="Ex: 5000" step="1" min="0" required>
+          <div class="field-group">
+            <div class="group-label">📍 Localização</div>
+            <div class="row-2">
+              <div class="field">
+                <label for="pintNucleo">Núcleo</label>
+                <select id="pintNucleo" name="nucleo" required>
+                  <option value="" disabled selected>Selecione o núcleo</option>
+                  <option>Aeroporto</option>
+                  <option>Paraiso 1</option>
+                  <option>Paraiso 2</option>
+                  <option>Paraiso 3</option>
+                  <option>Paraiso 4</option>
+                  <option>Santa Rosa</option>
+                  <option>Vauzinho</option>
+                  <option>Flamboyant</option>
+                  <option>Aroeira</option>
+                  <option>Engopa</option>
+                  <option>Vinagre 1</option>
+                  <option>Vinagre 2</option>
+                  <option>Vinagre 3</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pintAviario">Aviário</label>
+                <select id="pintAviario" name="aviario" required disabled>
+                  <option value="" selected>Selecione o núcleo primeiro</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="row-2">
+          <div class="field-group">
+            <div class="group-label">🐣 Alojamento</div>
             <div class="field">
-              <label for="pintTempGalpao">Temperatura do Galpão (°C)</label>
-              <input type="number" id="pintTempGalpao" name="tempGalpao" placeholder="Ex: 32,5" step="0.1" inputmode="decimal" required>
+              <label for="pintData">Data</label>
+              <input type="date" id="pintData" name="data" required>
             </div>
-            <div class="field">
-              <label for="pintTempCaminhao">Temperatura do Caminhão (°C)</label>
-              <input type="number" id="pintTempCaminhao" name="tempCaminhao" placeholder="Ex: 30,0" step="0.1" inputmode="decimal" required>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="pintQuantidade">Quantidade de Pintinhos</label>
+                <input type="number" id="pintQuantidade" name="quantidade" placeholder="Ex: 5000" step="1" min="0" required>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="pintTempGalpao">Temperatura do Galpão (°C)</label>
+                <input type="number" id="pintTempGalpao" name="tempGalpao" placeholder="Ex: 32,5" step="0.1" inputmode="decimal" required>
+              </div>
+              <div class="field">
+                <label for="pintTempCaminhao">Temperatura do Caminhão (°C)</label>
+                <input type="number" id="pintTempCaminhao" name="tempCaminhao" placeholder="Ex: 30,0" step="0.1" inputmode="decimal" required>
+              </div>
             </div>
           </div>
 
-          <div class="group-label" style="margin-bottom:4px;">Avaliação de Qualidade</div>
-          <p style="font-size:11px; color:var(--ink-soft); margin:0 0 10px;">Quantidade de pintinhos afetados por critério</p>
+          <div class="field-group">
+            <div class="group-label" style="margin-bottom:2px;">🔍 Avaliação de Qualidade</div>
+            <p style="font-size:11px; color:var(--ink-soft); margin:0 0 10px;">Quantidade de pintinhos afetados por critério</p>
 
-          <div class="row-2">
-            <div class="field">
-              <label for="pintTempCloacal">Temp. Cloacal Fora do Padrão</label>
-              <input type="number" id="pintTempCloacal" name="tempCloacal" placeholder="0" step="1" min="0" required>
+            <div class="row-2">
+              <div class="field">
+                <label for="pintTempCloacal">Temp. Cloacal Fora do Padrão</label>
+                <input type="number" id="pintTempCloacal" name="tempCloacal" placeholder="0" step="1" min="0" required>
+              </div>
+              <div class="field">
+                <label for="pintPlumagem">Plumagem Ruim</label>
+                <input type="number" id="pintPlumagem" name="plumagem" placeholder="0" step="1" min="0" required>
+              </div>
             </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="pintDesidratacao">Desidratação</label>
+                <input type="number" id="pintDesidratacao" name="desidratacao" placeholder="0" step="1" min="0" required>
+              </div>
+              <div class="field">
+                <label for="pintUmbigo">Umbigo Aberto</label>
+                <input type="number" id="pintUmbigo" name="umbigo" placeholder="0" step="1" min="0" required>
+              </div>
+            </div>
+
             <div class="field">
-              <label for="pintPlumagem">Plumagem Ruim</label>
-              <input type="number" id="pintPlumagem" name="plumagem" placeholder="0" step="1" min="0" required>
+              <label for="pintHematoma">Hematoma nas Articulações</label>
+              <input type="number" id="pintHematoma" name="hematoma" placeholder="0" step="1" min="0" required>
             </div>
           </div>
 
-          <div class="row-2">
+          <div class="field-group">
+            <div class="group-label">👤 Responsável</div>
             <div class="field">
-              <label for="pintDesidratacao">Desidratação</label>
-              <input type="number" id="pintDesidratacao" name="desidratacao" placeholder="0" step="1" min="0" required>
+              <label for="pintFuncionario">Nome do Funcionário</label>
+              <input type="text" id="pintFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
             </div>
-            <div class="field">
-              <label for="pintUmbigo">Umbigo Aberto</label>
-              <input type="number" id="pintUmbigo" name="umbigo" placeholder="0" step="1" min="0" required>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="pintHematoma">Hematoma nas Articulações</label>
-            <input type="number" id="pintHematoma" name="hematoma" placeholder="0" step="1" min="0" required>
-          </div>
-
-          <div class="field">
-            <label for="pintFuncionario">Nome do Funcionário</label>
-            <input type="text" id="pintFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
           </div>
 
           <button type="submit" id="pint-submit-btn" class="submit-full">ENVIAR REGISTRO</button>
@@ -1216,10 +1225,10 @@
   function mostrarApp(usuario) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-content').style.display = 'block';
-    document.getElementById('avatar-wrap').style.display = 'block';
-    document.getElementById('avatar-btn').textContent = iniciais(usuario.nome);
-    document.getElementById('user-nome').textContent = usuario.nome;
-    document.getElementById('user-email').textContent = usuario.email;
+    document.getElementById('avatar-wrap').style.display = 'flex';
+    const avatarBtn = document.getElementById('avatar-btn');
+    avatarBtn.textContent = iniciais(usuario.nome);
+    avatarBtn.title = `${usuario.nome} (${usuario.email})`;
     const campoFuncionario = document.getElementById('funcionario');
     if (campoFuncionario) campoFuncionario.value = usuario.nome;
     const campoFuncionarioAmb = document.getElementById('ambFuncionario');
@@ -1288,20 +1297,7 @@
     if (window.google && google.accounts && google.accounts.id) {
       google.accounts.id.disableAutoSelect();
     }
-    document.getElementById('user-dropdown').classList.remove('show');
     mostrarLogin();
-  });
-
-  // ============ MENU DO AVATAR ============
-  document.getElementById('avatar-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('user-dropdown').classList.toggle('show');
-  });
-  document.addEventListener('click', (e) => {
-    const dropdown = document.getElementById('user-dropdown');
-    if (!dropdown.contains(e.target) && e.target.id !== 'avatar-btn') {
-      dropdown.classList.remove('show');
-    }
   });
 
   window.addEventListener('load', () => {
