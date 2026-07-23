@@ -197,11 +197,11 @@
     flex:1;
     border: none;
     background: transparent;
-    padding: 11px 10px;
+    padding: 11px 6px;
     border-radius: 9px;
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--red-dark);
     cursor: pointer;
     opacity: .6;
@@ -646,6 +646,7 @@
 
   <div class="tabs">
     <button type="button" class="tab-btn active" id="tab-novo">Novo Registro</button>
+    <button type="button" class="tab-btn" id="tab-ambiencia">Ambiência</button>
     <button type="button" class="tab-btn" id="tab-historico">Histórico</button>
   </div>
 
@@ -757,6 +758,79 @@
       <p>O lançamento foi salvo na planilha da equipe.</p>
       <div class="summary" id="summary-box"></div>
       <button class="btn-secondary" id="new-entry-btn">Registrar outra ocorrência</button>
+    </div>
+
+    <!-- AMBIÊNCIA -->
+    <div id="ambiencia-screen" style="display:none;">
+
+      <!-- FORM -->
+      <div id="ambiencia-form-wrap">
+        <p class="intro">Registro de temperatura e nível de amônia por aviário.</p>
+
+        <form id="ambiencia-form">
+          <div class="field">
+            <label for="ambNucleo">Núcleo</label>
+            <select id="ambNucleo" name="nucleo" required>
+              <option value="" disabled selected>Selecione o núcleo</option>
+              <option>Aeroporto</option>
+              <option>Paraiso 1</option>
+              <option>Paraiso 2</option>
+              <option>Paraiso 3</option>
+              <option>Paraiso 4</option>
+              <option>Santa Rosa</option>
+              <option>Vauzinho</option>
+              <option>Flamboyant</option>
+              <option>Aroeira</option>
+              <option>Engopa</option>
+              <option>Vinagre 1</option>
+              <option>Vinagre 2</option>
+              <option>Vinagre 3</option>
+            </select>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="ambAviario">Aviário</label>
+              <input type="text" id="ambAviario" name="aviario" placeholder="Ex: 1" required>
+            </div>
+            <div class="field">
+              <label for="ambData">Data</label>
+              <input type="date" id="ambData" name="data" required>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="ambTemperatura">Temperatura (°C)</label>
+              <input type="number" id="ambTemperatura" name="temperatura" placeholder="Ex: 28,5" step="0.1" inputmode="decimal" required>
+            </div>
+            <div class="field">
+              <label for="ambAmonia">Nível de Amônia (ppm)</label>
+              <input type="number" id="ambAmonia" name="amonia" placeholder="Ex: 15" step="0.1" inputmode="decimal" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ambFuncionario">Nome do Funcionário</label>
+            <input type="text" id="ambFuncionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
+          </div>
+
+          <button type="submit" id="amb-submit-btn" class="submit-full">ENVIAR REGISTRO</button>
+
+          <div id="amb-status-msg" class="status-msg"></div>
+        </form>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="ambiencia-success" class="success-screen">
+        <div class="check">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Registrado com sucesso!</h2>
+        <p>O registro de ambiência foi salvo na planilha da equipe.</p>
+        <div class="summary" id="amb-summary-box"></div>
+        <button class="btn-secondary" id="amb-new-entry-btn">Registrar outro</button>
+      </div>
     </div>
 
     <!-- HISTÓRICO -->
@@ -872,6 +946,8 @@
     document.getElementById('user-avatar').src = usuario.foto || '';
     const campoFuncionario = document.getElementById('funcionario');
     if (campoFuncionario) campoFuncionario.value = usuario.nome;
+    const campoFuncionarioAmb = document.getElementById('ambFuncionario');
+    if (campoFuncionarioAmb) campoFuncionarioAmb.value = usuario.nome;
   }
 
   function mostrarLogin() {
@@ -962,6 +1038,7 @@
 
   // Default date = hoje
   document.getElementById('data').valueAsDate = new Date();
+  document.getElementById('ambData').valueAsDate = new Date();
 
   // Breaker toggle arms the submit button
   let armed = false;
@@ -1105,27 +1182,103 @@
     document.getElementById('form-screen').style.display = 'block';
   });
 
-  // ============ ABAS (Novo Registro / Histórico) ============
+  // ============ FORMULÁRIO DE AMBIÊNCIA ============
+  const ambForm = document.getElementById('ambiencia-form');
+  const ambSubmitBtn = document.getElementById('amb-submit-btn');
+  const ambStatusMsg = document.getElementById('amb-status-msg');
+
+  ambForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    ambSubmitBtn.disabled = true;
+    ambSubmitBtn.textContent = "ENVIANDO...";
+    ambStatusMsg.className = "status-msg";
+    ambStatusMsg.textContent = "";
+
+    const data = new FormData(ambForm);
+    data.append('tipo', 'ambiencia');
+    if (usuarioLogado && usuarioLogado.idToken) {
+      data.append('idToken', usuarioLogado.idToken);
+      data.append('emailLogin', usuarioLogado.email || '');
+    }
+
+    try {
+      if (SCRIPT_URL.includes("COLE_AQUI")) {
+        throw new Error("CONFIG");
+      }
+      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      const summaryBox = document.getElementById('amb-summary-box');
+      summaryBox.innerHTML = `
+        <div><span>Núcleo</span><span>${data.get('nucleo')}</span></div>
+        <div><span>Aviário</span><span>${data.get('aviario')}</span></div>
+        <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
+        <div><span>Temperatura</span><span>${data.get('temperatura')} °C</span></div>
+        <div><span>Amônia</span><span>${data.get('amonia')} ppm</span></div>
+        <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
+      `;
+
+      document.getElementById('ambiencia-form-wrap').style.display = 'none';
+      document.getElementById('ambiencia-success').classList.add('show');
+
+    } catch (err) {
+      ambStatusMsg.classList.add('show', 'error');
+      if (err.message === "CONFIG") {
+        ambStatusMsg.textContent = "⚠ O sistema ainda não está conectado à planilha. Configure a SCRIPT_URL no arquivo index.html.";
+      } else {
+        ambStatusMsg.textContent = "Não foi possível enviar. Verifique sua internet e tente novamente.";
+      }
+      ambSubmitBtn.disabled = false;
+      ambSubmitBtn.textContent = "ENVIAR REGISTRO";
+    }
+  });
+
+  document.getElementById('amb-new-entry-btn').addEventListener('click', () => {
+    ambForm.reset();
+    document.getElementById('ambData').valueAsDate = new Date();
+    if (usuarioLogado) document.getElementById('ambFuncionario').value = usuarioLogado.nome;
+    ambSubmitBtn.disabled = false;
+    ambSubmitBtn.textContent = "ENVIAR REGISTRO";
+    document.getElementById('ambiencia-success').classList.remove('show');
+    document.getElementById('ambiencia-form-wrap').style.display = 'block';
+  });
+
+  // ============ ABAS (Novo Registro / Ambiência / Histórico) ============
   const tabNovo = document.getElementById('tab-novo');
+  const tabAmbiencia = document.getElementById('tab-ambiencia');
   const tabHistorico = document.getElementById('tab-historico');
   const formScreen = document.getElementById('form-screen');
+  const ambienciaScreen = document.getElementById('ambiencia-screen');
   const historicoScreen = document.getElementById('historico-screen');
 
   let historicoCarregado = false;
 
-  tabNovo.addEventListener('click', () => {
-    tabNovo.classList.add('active');
+  function esconderTudo() {
+    tabNovo.classList.remove('active');
+    tabAmbiencia.classList.remove('active');
     tabHistorico.classList.remove('active');
-    document.getElementById('success-screen').classList.remove('show');
-    formScreen.style.display = 'block';
+    formScreen.style.display = 'none';
+    ambienciaScreen.style.display = 'none';
     historicoScreen.classList.remove('show');
+    document.getElementById('success-screen').classList.remove('show');
+    document.getElementById('ambiencia-success').classList.remove('show');
+  }
+
+  tabNovo.addEventListener('click', () => {
+    esconderTudo();
+    tabNovo.classList.add('active');
+    formScreen.style.display = 'block';
+  });
+
+  tabAmbiencia.addEventListener('click', () => {
+    esconderTudo();
+    tabAmbiencia.classList.add('active');
+    ambienciaScreen.style.display = 'block';
   });
 
   tabHistorico.addEventListener('click', () => {
+    esconderTudo();
     tabHistorico.classList.add('active');
-    tabNovo.classList.remove('active');
-    formScreen.style.display = 'none';
-    document.getElementById('success-screen').classList.remove('show');
     historicoScreen.classList.add('show');
     if (!historicoCarregado) {
       carregarHistorico();
