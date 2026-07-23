@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Gerencial — Qualitti Granjas</title>
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+  :root{
+    --red: #C1272D;
+    --red-dark: #7A1518;
+    --gold: #F2A900;
+    --gold-light: #FCE8B4;
+    --cream: #FFFBF2;
+    --ink: #2B2420;
+    --ink-soft: #6b6058;
+    --success: #1E7A46;
+    --line: #EBDFC8;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  header{
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    padding: 18px 28px;
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+  header img{ height:42px; }
+  header h1{
+    font-family:"Poppins", system-ui, sans-serif;
+    font-size:18px; font-weight:800; color:#fff; margin:0;
+  }
+  header p{ margin:0; font-size:12px; color: var(--gold-light); font-weight:600; }
+  header .spacer{ flex:1; }
+  .avatar-wrap{ display:none; flex-direction:column; align-items:center; gap:4px; }
+  .avatar-btn{
+    width:40px; height:40px; border-radius:50%;
+    background: var(--gold); color: var(--red-dark);
+    font-family:"Poppins",sans-serif; font-weight:800; font-size:13px;
+    border:2px solid rgba(255,255,255,.6);
+  }
+  .sair-link{
+    background:transparent; border:none; color: var(--gold-light);
+    font-size:10.5px; font-weight:700; cursor:pointer; text-decoration:underline;
+  }
+  .gold-line{ height:6px; background: var(--gold); }
+
+  main{ max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .login-card{
+    max-width: 380px; margin: 60px auto; background:#fff; border:1px solid var(--line);
+    border-radius:16px; padding:40px 30px; text-align:center; box-shadow:0 10px 30px rgba(122,21,24,.1);
+  }
+  .login-card .icon-wrap{
+    width:56px; height:56px; border-radius:50%; background:var(--gold-light);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 18px;
+  }
+  .login-card h2{ font-family:"Poppins",sans-serif; color:var(--red-dark); font-size:17px; margin:0 0 8px; }
+  .login-card p{ font-size:12.5px; color:var(--ink-soft); margin:0 0 22px; line-height:1.5; }
+  #google-signin-btn{ display:flex; justify-content:center; }
+  .login-loading{ display:none; margin-top:14px; font-size:12.5px; color:var(--ink-soft); }
+  .login-loading.show{ display:block; }
+  .spinner{
+    display:inline-block; width:13px; height:13px; border:2px solid var(--line);
+    border-top-color:var(--red); border-radius:50%; margin-right:8px; vertical-align:-2px;
+    animation: girar .7s linear infinite;
+  }
+  @keyframes girar{ to{ transform:rotate(360deg); } }
+
+  .modulo-tabs{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .modulo-tab{
+    padding: 10px 18px; border-radius:10px; border:1.6px solid var(--line);
+    background:#fff; font-family:"Poppins",sans-serif; font-weight:700; font-size:13px;
+    color:var(--ink-soft); cursor:pointer;
+  }
+  .modulo-tab.active{ background:var(--red-dark); color:#fff; border-color:var(--red-dark); }
+
+  .filtros-bar{
+    display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin-bottom:20px;
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px;
+  }
+  .filtros-bar .campo{ display:flex; flex-direction:column; gap:5px; min-width:160px; flex:1; }
+  .filtros-bar label{ font-size:11px; font-weight:700; color:var(--red-dark); text-transform:uppercase; letter-spacing:.3px; }
+  .filtros-bar select, .filtros-bar input{
+    padding:9px 10px; border-radius:8px; border:1.4px solid var(--line); font-size:13px; background:var(--cream);
+  }
+  .btn-export{
+    background:var(--success); color:#fff; border:none; border-radius:9px;
+    padding:10px 18px; font-family:"Poppins",sans-serif; font-weight:700; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; white-space:nowrap;
+  }
+
+  .cards-resumo{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:20px; }
+  .card-resumo{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; text-align:center;
+  }
+  .card-resumo .num{ font-family:"Poppins",sans-serif; font-weight:800; font-size:24px; color:var(--red-dark); }
+  .card-resumo .lbl{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.3px; margin-top:4px; }
+
+  .chart-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:20px;
+    height:340px;
+  }
+
+  .table-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:0; overflow-x:auto;
+  }
+  table.dados{ width:100%; border-collapse:collapse; font-size:13px; min-width:700px; }
+  table.dados th{
+    background: var(--red-dark); color:#fff; padding:11px 10px; text-align:left; font-weight:700;
+    white-space:nowrap; position:sticky; top:0;
+  }
+  table.dados td{ padding:9px 10px; border-top:1px solid var(--line); white-space:nowrap; }
+  table.dados tr:nth-child(even) td{ background: var(--cream); }
+
+  .empty-msg, .loading-msg{ text-align:center; padding:40px; color:var(--ink-soft); font-size:13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Qualitti Alimentos">
+  <div>
+    <h1>Painel Gerencial</h1>
+    <p>Qualitti Granjas — Registros de Produção</p>
+  </div>
+  <div class="spacer"></div>
+  <div id="avatar-wrap" class="avatar-wrap">
+    <button type="button" id="avatar-btn" class="avatar-btn" title="Usuário logado">?</button>
+    <button type="button" id="btn-logout" class="sair-link">Sair</button>
+  </div>
+</header>
+<div class="gold-line"></div>
+
+<main>
+
+  <div id="login-card" class="login-card">
+    <div class="icon-wrap">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 8v13M12 8a4 4 0 100-8 4 4 0 000 8z" stroke="#7A1518" stroke-width="2" stroke-linecap="round"/><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="#7A1518" stroke-width="2"/></svg>
+    </div>
+    <h2>Painel Gerencial</h2>
+    <p>Entre com sua conta Google para visualizar os relatórios e gráficos de produção.</p>
+    <div id="google-signin-btn"></div>
+    <div class="login-loading" id="login-loading"><span class="spinner"></span>Entrando...</div>
+  </div>
+
+  <div id="painel-content" style="display:none;">
+
+    <div class="modulo-tabs">
+      <button type="button" class="modulo-tab active" data-modulo="faltas">⚡ Falta de Energia</button>
+      <button type="button" class="modulo-tab" data-modulo="ambiencia">🌡️ Ambiência</button>
+      <button type="button" class="modulo-tab" data-modulo="pintinhos">🐣 Pintinhos</button>
+    </div>
+
+    <div class="filtros-bar">
+      <div class="campo">
+        <label for="f-nucleo">Núcleo</label>
+        <select id="f-nucleo">
+          <option value="">Todos os núcleos</option>
+          <option>Aeroporto</option><option>Paraiso 1</option><option>Paraiso 2</option>
+          <option>Paraiso 3</option><option>Paraiso 4</option><option>Santa Rosa</option>
+          <option>Vauzinho</option><option>Flamboyant</option><option>Aroeira</option>
+          <option>Engopa</option><option>Vinagre 1</option><option>Vinagre 2</option><option>Vinagre 3</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="f-de">Período - De</label>
+        <input type="date" id="f-de">
+      </div>
+      <div class="campo">
+        <label for="f-ate">Período - Até</label>
+        <input type="date" id="f-ate">
+      </div>
+      <button type="button" class="btn-export" id="btn-exportar">⬇ Exportar Excel</button>
+    </div>
+
+    <div class="cards-resumo" id="cards-resumo"></div>
+
+    <div class="chart-card"><canvas id="grafico"></canvas></div>
+
+    <div id="loading-msg" class="loading-msg">Carregando dados...</div>
+    <div id="empty-msg" class="empty-msg" style="display:none;">Nenhum registro encontrado.</div>
+
+    <div class="table-card" id="table-wrap" style="display:none;">
+      <table class="dados">
+        <thead><tr id="table-head"></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOUwXG93ult7F2pS8AGDpZsxuQjOm6khCnsyJ2GT5yJ6I1J1f45Nz6kTqLmwN-clu9/exec";
+  const GOOGLE_CLIENT_ID = "779709035083-4umu9n4uk47rs6bo8lq5eelasvl0k9vg.apps.googleusercontent.com";
+  const CHAVE_LOGIN = 'faltas-energia-login';
+
+  function decodificarJWT(token) {
+    const payload = token.split('.')[1];
+    const json = decodeURIComponent(atob(payload.replace(/-/g,'+').replace(/_/g,'/'))
+      .split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(json);
+  }
+
+  function iniciais(nome) {
+    const partes = (nome || '').trim().split(/\s+/);
+    if (!partes[0]) return '?';
+    if (partes.length === 1) return partes[0].slice(0,2).toUpperCase();
+    return (partes[0][0] + partes[partes.length-1][0]).toUpperCase();
+  }
+
+  let usuarioLogado = null;
+
+  function mostrarPainel(usuario) {
+    document.getElementById('login-card').style.display = 'none';
+    document.getElementById('painel-content').style.display = 'block';
+    document.getElementById('avatar-wrap').style.display = 'flex';
+    const avatarBtn = document.getElementById('avatar-btn');
+    avatarBtn.textContent = iniciais(usuario.nome);
+    avatarBtn.title = `${usuario.nome} (${usuario.email})`;
+    carregarModulo('faltas');
+  }
+
+  function mostrarLogin() {
+    document.getElementById('avatar-wrap').style.display = 'none';
+    document.getElementById('login-card').style.display = 'block';
+    document.getElementById('painel-content').style.display = 'none';
+  }
+
+  function handleCredentialResponse(response) {
+    const loadingEl = document.getElementById('login-loading');
+    const googleBtn = document.getElementById('google-signin-btn');
+    googleBtn.style.display = 'none';
+    loadingEl.classList.add('show');
+    const dados = decodificarJWT(response.credential);
+    usuarioLogado = { nome: dados.name || dados.email, email: dados.email, idToken: response.credential, exp: dados.exp };
+    localStorage.setItem(CHAVE_LOGIN, JSON.stringify(usuarioLogado));
+    setTimeout(() => { loadingEl.classList.remove('show'); mostrarPainel(usuarioLogado); }, 500);
+  }
+
+  function tentarRestaurarSessao() {
+    try {
+      const salvo = localStorage.getItem(CHAVE_LOGIN);
+      if (!salvo) return false;
+      const usuario = JSON.parse(salvo);
+      if (usuario.exp && (Date.now()/1000) > usuario.exp) { localStorage.removeItem(CHAVE_LOGIN); return false; }
+      usuarioLogado = usuario;
+      mostrarPainel(usuario);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    localStorage.removeItem(CHAVE_LOGIN);
+    usuarioLogado = null;
+    if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+    mostrarLogin();
+  });
+
+  window.addEventListener('load', () => {
+    if (tentarRestaurarSessao()) return;
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+      google.accounts.id.renderButton(document.getElementById('google-signin-btn'), { theme:'outline', size:'large', text:'signin_with', shape:'pill', width:260 });
+    }
+  });
+
+  // ============ CONFIGURAÇÃO DOS MÓDULOS ============
+  function duracaoParaMinutos(str) {
+    if (!str) return 0;
+    const p = String(str).split(':');
+    if (p.length < 2) return 0;
+    return (parseInt(p[0],10)||0)*60 + (parseInt(p[1],10)||0);
+  }
+  function minutosParaTexto(min) {
+    return `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}min`;
+  }
+  function parseDataBR(str) {
+    if (!str) return null;
+    const p = String(str).split('/');
+    if (p.length !== 3) return null;
+    const [d,m,y] = p.map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  const MODULOS = {
+    faltas: {
+      label: 'Falta de Energia',
+      colunas: ['Núcleo','Unidade Consumidora','Data','Nº Protocolo','Horário Início','Horário Retorno','Duração','Consumo Óleo Diesel (L)','Funcionário','Observações'],
+      resumo: (regs) => {
+        const totalMin = regs.reduce((a,r)=>a+duracaoParaMinutos(r['Duração']),0);
+        const totalDiesel = regs.reduce((a,r)=>a+(parseFloat(r['Consumo Óleo Diesel (L)'])||0),0);
+        return [
+          { lbl:'Registros', num: regs.length },
+          { lbl:'Duração total', num: minutosParaTexto(totalMin) },
+          { lbl:'Diesel total (L)', num: totalDiesel.toFixed(1) },
+        ];
+      },
+      grafico: (regs) => {
+        const porNucleo = {};
+        regs.forEach(r => { porNucleo[r['Núcleo']] = (porNucleo[r['Núcleo']]||0) + duracaoParaMinutos(r['Duração'])/60; });
+        return {
+          type: 'bar',
+          labels: Object.keys(porNucleo),
+          datasets: [{ label:'Duração total (h)', data: Object.values(porNucleo).map(v=>+v.toFixed(1)), backgroundColor:'#C1272D' }]
+        };
+      }
+    },
+    ambiencia: {
+      label: 'Ambiência',
+      colunas: ['Núcleo','Aviário','Data','Temperatura (°C)','Nível de Amônia (ppm)','Funcionário','E-mail'],
+      resumo: (regs) => {
+        const temps = regs.map(r=>parseFloat(r['Temperatura (°C)'])).filter(v=>!isNaN(v));
+        const amonias = regs.map(r=>parseFloat(r['Nível de Amônia (ppm)'])).filter(v=>!isNaN(v));
+        const media = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+        return [
+          { lbl:'Registros', num: regs.length },
+          { lbl:'Temp. média (°C)', num: media(temps).toFixed(1) },
+          { lbl:'Amônia média (ppm)', num: media(amonias).toFixed(1) },
+        ];
+      },
+      grafico: (regs) => {
+        const porNucleo = {};
+        regs.forEach(r => {
+          const n = r['Núcleo'];
+          if (!porNucleo[n]) porNucleo[n] = { temp:[], amonia:[] };
+          const t = parseFloat(r['Temperatura (°C)']); if (!isNaN(t)) porNucleo[n].temp.push(t);
+          const a = parseFloat(r['Nível de Amônia (ppm)']); if (!isNaN(a)) porNucleo[n].amonia.push(a);
+        });
+        const labels = Object.keys(porNucleo);
+        const media = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+        return {
+          type: 'bar',
+          labels,
+          datasets: [
+            { label:'Temperatura média (°C)', data: labels.map(n=>+media(porNucleo[n].temp).toFixed(1)), backgroundColor:'#C1272D' },
+            { label:'Amônia média (ppm)', data: labels.map(n=>+media(porNucleo[n].amonia).toFixed(1)), backgroundColor:'#F2A900' },
+          ]
+        };
+      }
+    },
+    pintinhos: {
+      label: 'Pintinhos',
+      colunas: ['Núcleo','Aviário','Data','Quantidade de Pintinhos','Temperatura do Galpão (°C)','Temperatura do Caminhão (°C)','Temp. Cloacal Fora do Padrão','Plumagem Ruim','Desidratação','Umbigo Aberto','Hematoma nas Articulações','Funcionário'],
+      resumo: (regs) => {
+        const soma = campo => regs.reduce((a,r)=>a+(parseFloat(r[campo])||0),0);
+        return [
+          { lbl:'Lotes registrados', num: regs.length },
+          { lbl:'Total de pintinhos', num: soma('Quantidade de Pintinhos').toLocaleString('pt-BR') },
+          { lbl:'Total c/ problema', num: (soma('Temp. Cloacal Fora do Padrão')+soma('Plumagem Ruim')+soma('Desidratação')+soma('Umbigo Aberto')+soma('Hematoma nas Articulações')).toFixed(0) },
+        ];
+      },
+      grafico: (regs) => {
+        const campos = ['Temp. Cloacal Fora do Padrão','Plumagem Ruim','Desidratação','Umbigo Aberto','Hematoma nas Articulações'];
+        const somas = campos.map(c => regs.reduce((a,r)=>a+(parseFloat(r[c])||0),0));
+        return {
+          type: 'bar',
+          labels: campos,
+          datasets: [{ label:'Total de pintinhos afetados', data: somas, backgroundColor:'#7A1518' }]
+        };
+      }
+    }
+  };
+
+  let moduloAtual = 'faltas';
+  let dadosPorModulo = {};
+  let chartInstance = null;
+
+  document.querySelectorAll('.modulo-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modulo-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      carregarModulo(btn.dataset.modulo);
+    });
+  });
+
+  async function carregarModulo(modulo) {
+    moduloAtual = modulo;
+    document.getElementById('loading-msg').style.display = 'block';
+    document.getElementById('empty-msg').style.display = 'none';
+    document.getElementById('table-wrap').style.display = 'none';
+
+    if (!dadosPorModulo[modulo]) {
+      try {
+        const resp = await fetch(`${SCRIPT_URL}?action=listar&modulo=${modulo}`);
+        const json = await resp.json();
+        if (json.status !== 'ok') throw new Error(json.mensagem);
+        dadosPorModulo[modulo] = json.registros || [];
+      } catch (err) {
+        document.getElementById('loading-msg').textContent = 'Não foi possível carregar os dados.';
+        return;
+      }
+    }
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    const nucleo = document.getElementById('f-nucleo').value;
+    const de = document.getElementById('f-de').value;
+    const ate = document.getElementById('f-ate').value;
+    const dataDe = de ? new Date(de+'T00:00:00') : null;
+    const dataAte = ate ? new Date(ate+'T23:59:59') : null;
+
+    const todos = dadosPorModulo[moduloAtual] || [];
+    const filtrados = todos.filter(r => {
+      if (nucleo && r['Núcleo'] !== nucleo) return false;
+      if (dataDe || dataAte) {
+        const d = parseDataBR(r['Data']);
+        if (!d) return false;
+        if (dataDe && d < dataDe) return false;
+        if (dataAte && d > dataAte) return false;
+      }
+      return true;
+    });
+
+    renderizar(filtrados);
+  }
+
+  document.getElementById('f-nucleo').addEventListener('change', aplicarFiltros);
+  document.getElementById('f-de').addEventListener('change', aplicarFiltros);
+  document.getElementById('f-ate').addEventListener('change', aplicarFiltros);
+
+  function renderizar(regs) {
+    const config = MODULOS[moduloAtual];
+    document.getElementById('loading-msg').style.display = 'none';
+
+    const cardsEl = document.getElementById('cards-resumo');
+    cardsEl.innerHTML = config.resumo(regs).map(c => `
+      <div class="card-resumo"><div class="num">${c.num}</div><div class="lbl">${c.lbl}</div></div>
+    `).join('');
+
+    const g = config.grafico(regs);
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(document.getElementById('grafico'), {
+      type: g.type,
+      data: { labels: g.labels, datasets: g.datasets },
+      options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+    });
+
+    if (regs.length === 0) {
+      document.getElementById('empty-msg').style.display = 'block';
+      document.getElementById('table-wrap').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('table-wrap').style.display = 'block';
+    document.getElementById('table-head').innerHTML = config.colunas.map(c => `<th>${c}</th>`).join('');
+    document.getElementById('table-body').innerHTML = regs.map(r => `
+      <tr>${config.colunas.map(c => `<td>${r[c] ?? ''}</td>`).join('')}</tr>
+    `).join('');
+
+    window.__registrosAtuais = regs;
+  }
+
+  document.getElementById('btn-exportar').addEventListener('click', async () => {
+    const regs = window.__registrosAtuais || [];
+    if (regs.length === 0) return;
+    const config = MODULOS[moduloAtual];
+    const btn = document.getElementById('btn-exportar');
+    const original = btn.textContent;
+    btn.textContent = 'Gerando...';
+    btn.disabled = true;
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet(config.label);
+      sheet.columns = config.colunas.map(c => ({ header:c, key:c, width: Math.max(14, c.length+2) }));
+      regs.forEach(r => sheet.addRow(config.colunas.reduce((o,c)=>{ o[c]=r[c]||''; return o; }, {})));
+
+      const headerRow = sheet.getRow(1);
+      headerRow.eachCell(cell => {
+        cell.font = { bold:true, color:{argb:'FFFFFFFF'} };
+        cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF8C1D1F'} };
+      });
+      sheet.autoFilter = { from:'A1', to: `${String.fromCharCode(64+config.colunas.length)}1` };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${config.label.replace(/\s/g,'_')}_Qualitti_${new Date().toISOString().slice(0,10)}.xlsx`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Não foi possível gerar o arquivo Excel.');
+    } finally {
+      btn.textContent = original;
+      btn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
