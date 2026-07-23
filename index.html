@@ -97,52 +97,164 @@
   }
   .login-error.show{ display:block; }
 
-  /* ---------- Faixa do usuário logado ---------- */
-  .user-bar{
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    background: var(--cream);
+  .spinner{
+    display:inline-block;
+    width:13px; height:13px;
+    border:2px solid var(--line);
+    border-top-color: var(--red);
+    border-radius:50%;
+    margin-right:8px;
+    vertical-align:-2px;
+    animation: girar .7s linear infinite;
+  }
+  @keyframes girar{ to{ transform:rotate(360deg); } }
+
+  .trust-note{
+    margin-top: 20px !important;
+    font-size: 10.5px !important;
+    color: #a89a7a !important;
+  }
+
+  /* ---------- Avatar + menu do usuário (no cabeçalho) ---------- */
+  .avatar-wrap{
+    position: relative;
+    flex-shrink: 0;
+  }
+  .avatar-btn{
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--red-dark);
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 12.5px;
+    border: 2px solid rgba(255,255,255,.5);
+    cursor: pointer;
+  }
+  .user-dropdown{
+    display:none;
+    position: absolute;
+    top: 42px;
+    right: 0;
+    background: #fff;
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 9px 12px;
-    margin-bottom: 16px;
+    padding: 12px;
+    width: 190px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.18);
+    z-index: 20;
   }
-  .user-bar img{
-    width: 28px; height:28px;
-    border-radius: 50%;
-    flex-shrink:0;
-  }
-  .user-bar .info{
-    flex:1;
-    min-width:0;
-  }
-  .user-bar .info .nome{
+  .user-dropdown.show{ display:block; }
+  .user-dropdown .nome{
     font-size: 12.5px;
     font-weight: 700;
     color: var(--red-dark);
     white-space: nowrap;
-    overflow:hidden;
+    overflow: hidden;
     text-overflow: ellipsis;
   }
-  .user-bar .info .email{
+  .user-dropdown .email{
     font-size: 10.5px;
     color: var(--ink-soft);
     white-space: nowrap;
-    overflow:hidden;
+    overflow: hidden;
     text-overflow: ellipsis;
+    margin-bottom: 8px;
   }
-  .user-bar button{
-    flex-shrink:0;
+  .user-dropdown .divider{
+    height: 1px;
+    background: var(--line);
+    margin-bottom: 8px;
+  }
+  .user-dropdown button{
+    width: 100%;
     background: transparent;
-    border: 1.4px solid var(--line);
-    color: var(--ink-soft);
-    font-size: 11px;
+    border: none;
+    color: var(--red);
+    font-size: 12.5px;
     font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 8px;
+    text-align: left;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+
+  /* ---------- Barra de navegação inferior ---------- */
+  .bottom-nav{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    background: #fff;
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 14px rgba(0,0,0,.06);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    z-index: 15;
+  }
+  .nav-item{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: transparent;
+    border: none;
+    padding: 6px 2px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .nav-item .nav-icon{ font-size: 19px; line-height:1; }
+  .nav-item .nav-label{
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .nav-item.active{
+    color: var(--red-dark);
+    background: var(--gold-light);
+  }
+
+  /* ---------- Tela "Mais" ---------- */
+  .mais-lista{ display:flex; flex-direction:column; gap:10px; }
+  .mais-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .mais-item:disabled{ opacity:.55; cursor:default; }
+  .mais-icon{ font-size:20px; flex-shrink:0; }
+  .mais-texto{ flex:1; display:flex; flex-direction:column; gap:2px; }
+  .mais-titulo{ font-size:13px; font-weight:700; color:var(--ink); }
+  .mais-sub{ font-size:11px; color:var(--ink-soft); }
+  .mais-seta{ font-size:18px; color: var(--ink-soft); }
+
+  .hist-voltar{
+    background:transparent;
+    border:none;
+    color: var(--red-dark);
+    font-weight:700;
+    font-size:12.5px;
+    padding:0 0 12px;
     cursor:pointer;
   }
+
+  /* ---------- Agrupamento de campos ---------- */
+  .group-label{
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--red-dark);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin: 18px 0 8px;
+  }
+  .group-label:first-child{ margin-top: 0; }
+
 
   /* ---------- Header ---------- */
   header{
@@ -185,36 +297,6 @@
   }
 
   /* ---------- Menu principal (módulos) ---------- */
-  .menu-principal{
-    display:flex;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .menu-btn{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap: 4px;
-    padding: 12px 4px;
-    border-radius: 12px;
-    border: 1.6px solid var(--line);
-    background: #fff;
-    font-family: "Poppins", system-ui, sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    color: var(--ink-soft);
-    cursor: pointer;
-    text-align: center;
-    line-height: 1.25;
-    transition: background .15s, color .15s, border-color .15s;
-  }
-  .menu-btn.active{
-    background: var(--red-dark);
-    color: #fff;
-    border-color: var(--red-dark);
-    box-shadow: 0 4px 12px rgba(122,21,24,.25);
-  }
 
   /* ---------- Tabs (sub-navegação dentro de um módulo) ---------- */
   .tabs{
@@ -647,6 +729,15 @@
     <h1>Qualitti Granjas</h1>
     <p>Registros de Produção</p>
   </div>
+  <div id="avatar-wrap" class="avatar-wrap" style="display:none;">
+    <button type="button" id="avatar-btn" class="avatar-btn">FL</button>
+    <div id="user-dropdown" class="user-dropdown">
+      <div class="nome" id="user-nome">—</div>
+      <div class="email" id="user-email">—</div>
+      <div class="divider"></div>
+      <button type="button" id="btn-logout">Sair</button>
+    </div>
+  </div>
 </header>
 <div class="circuit-line"></div>
 
@@ -655,37 +746,18 @@
   <!-- LOGIN -->
   <div id="login-screen" class="login-screen">
     <div class="icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="#7A1518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v13M12 8a4 4 0 100-8 4 4 0 000 8z" stroke="#7A1518" stroke-width="2" stroke-linecap="round"/><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="#7A1518" stroke-width="2"/></svg>
     </div>
-    <h2>Entrar para registrar</h2>
-    <p>Entre com sua conta Google para que o sistema<br>identifique automaticamente quem está lançando.</p>
+    <h2>Bem-vindo de volta</h2>
+    <p>Entre com sua conta Google para registrar<br>as informações da sua unidade.</p>
     <div id="google-signin-btn"></div>
-    <div class="login-loading" id="login-loading">Entrando...</div>
+    <div class="login-loading" id="login-loading"><span class="spinner"></span>Entrando...</div>
     <div class="login-error" id="login-error">Não foi possível confirmar seu login. Tente novamente.</div>
+    <p class="trust-note">Nenhum dado do Google é compartilhado</p>
   </div>
 
   <!-- APP (visível só depois do login) -->
   <div id="app-content" style="display:none;">
-
-  <div class="user-bar">
-    <img id="user-avatar" src="" alt="">
-    <div class="info">
-      <div class="nome" id="user-nome">—</div>
-      <div class="email" id="user-email">—</div>
-    </div>
-    <button type="button" id="btn-logout">Sair</button>
-  </div>
-
-  <div class="menu-principal">
-    <button type="button" class="menu-btn active" id="menu-faltas">⚡ Falta de Energia</button>
-    <button type="button" class="menu-btn" id="menu-ambiencia">🌡️ Ambiência</button>
-    <button type="button" class="menu-btn" id="menu-pintinhos">🐣 Pintinhos</button>
-  </div>
-
-  <div class="tabs" id="subtabs-faltas">
-    <button type="button" class="tab-btn active" id="tab-novo">Lançamento</button>
-    <button type="button" class="tab-btn" id="tab-historico">Histórico</button>
-  </div>
 
   <div class="card">
 
@@ -704,6 +776,7 @@
       <p class="intro">Preencha os dados abaixo assim que a energia retornar no núcleo. As informações são enviadas direto para a planilha da equipe.</p>
 
       <form id="outage-form">
+        <div class="group-label">Localização</div>
         <div class="field">
           <label for="nucleo">Núcleo</label>
           <select id="nucleo" name="nucleo" required>
@@ -729,11 +802,7 @@
           <input type="text" id="unidadeConsumidora" name="unidadeConsumidora" placeholder="Nº da Unidade Consumidora" required>
         </div>
 
-        <div class="field">
-          <label for="funcionario">Nome do Funcionário</label>
-          <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
-        </div>
-
+        <div class="group-label">Ocorrência</div>
         <div class="row-2">
           <div class="field">
             <label for="data">Data</label>
@@ -745,6 +814,7 @@
           </div>
         </div>
 
+        <div class="group-label">Horários da falta</div>
         <div class="row-2">
           <div class="field">
             <label for="inicio">Horário Início</label>
@@ -761,6 +831,7 @@
           <span id="duration-text">Duração da falta: —</span>
         </div>
 
+        <div class="group-label">Detalhes adicionais</div>
         <div class="field">
           <label for="consumoDiesel">Consumo de Óleo Diesel (litros)</label>
           <input type="number" id="consumoDiesel" name="consumoDiesel" placeholder="Ex: 12,5" step="0.1" min="0" inputmode="decimal" required>
@@ -769,6 +840,11 @@
         <div class="field">
           <label for="observacoes">Observações <span class="hint" style="display:inline;text-transform:none;">(opcional)</span></label>
           <textarea id="observacoes" name="observacoes" placeholder="Motivo da falta, ações tomadas, etc."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="funcionario">Nome do Funcionário</label>
+          <input type="text" id="funcionario" name="funcionario" placeholder="Preenchido pelo login" required readonly style="background:#f2ece0; color:var(--ink-soft);">
         </div>
 
         <div class="breaker-wrap">
@@ -805,39 +881,40 @@
         <p class="intro">Registro de temperatura e nível de amônia por aviário.</p>
 
         <form id="ambiencia-form">
-          <div class="field">
-            <label for="ambNucleo">Núcleo</label>
-            <select id="ambNucleo" name="nucleo" required>
-              <option value="" disabled selected>Selecione o núcleo</option>
-              <option>Aeroporto</option>
-              <option>Paraiso 1</option>
-              <option>Paraiso 2</option>
-              <option>Paraiso 3</option>
-              <option>Paraiso 4</option>
-              <option>Santa Rosa</option>
-              <option>Vauzinho</option>
-              <option>Flamboyant</option>
-              <option>Aroeira</option>
-              <option>Engopa</option>
-              <option>Vinagre 1</option>
-              <option>Vinagre 2</option>
-              <option>Vinagre 3</option>
-            </select>
-          </div>
-
+          <div class="group-label">Localização</div>
           <div class="row-2">
+            <div class="field">
+              <label for="ambNucleo">Núcleo</label>
+              <select id="ambNucleo" name="nucleo" required>
+                <option value="" disabled selected>Selecione o núcleo</option>
+                <option>Aeroporto</option>
+                <option>Paraiso 1</option>
+                <option>Paraiso 2</option>
+                <option>Paraiso 3</option>
+                <option>Paraiso 4</option>
+                <option>Santa Rosa</option>
+                <option>Vauzinho</option>
+                <option>Flamboyant</option>
+                <option>Aroeira</option>
+                <option>Engopa</option>
+                <option>Vinagre 1</option>
+                <option>Vinagre 2</option>
+                <option>Vinagre 3</option>
+              </select>
+            </div>
             <div class="field">
               <label for="ambAviario">Aviário</label>
               <select id="ambAviario" name="aviario" required disabled>
                 <option value="" selected>Selecione o núcleo primeiro</option>
               </select>
             </div>
-            <div class="field">
-              <label for="ambData">Data</label>
-              <input type="date" id="ambData" name="data" required>
-            </div>
           </div>
 
+          <div class="group-label">Medições</div>
+          <div class="field">
+            <label for="ambData">Data</label>
+            <input type="date" id="ambData" name="data" required>
+          </div>
           <div class="row-2">
             <div class="field">
               <label for="ambTemperatura">Temperatura (°C)</label>
@@ -880,6 +957,7 @@
         <p class="intro">Registro de qualidade dos pintinhos no alojamento.</p>
 
         <form id="pintinhos-form">
+          <div class="group-label">Localização</div>
           <div class="row-2">
             <div class="field">
               <label for="pintNucleo">Núcleo</label>
@@ -908,6 +986,7 @@
             </div>
           </div>
 
+          <div class="group-label">Alojamento</div>
           <div class="field">
             <label for="pintData">Data</label>
             <input type="date" id="pintData" name="data" required>
@@ -931,9 +1010,8 @@
             </div>
           </div>
 
-          <div class="field" style="margin-top:4px;">
-            <label style="font-size:12px; color:var(--red-dark); font-weight:800; text-transform:uppercase; letter-spacing:.3px;">Avaliação de Qualidade — quantidade de pintinhos afetados</label>
-          </div>
+          <div class="group-label" style="margin-bottom:4px;">Avaliação de Qualidade</div>
+          <p style="font-size:11px; color:var(--ink-soft); margin:0 0 10px;">Quantidade de pintinhos afetados por critério</p>
 
           <div class="row-2">
             <div class="field">
@@ -985,8 +1063,31 @@
       </div>
     </div>
 
+    <!-- MAIS -->
+    <div id="mais-screen" style="display:none;">
+      <p class="intro">Outras opções e relatórios.</p>
+      <div class="mais-lista">
+        <button type="button" class="mais-item" id="mais-historico">
+          <span class="mais-icon">📊</span>
+          <span class="mais-texto">
+            <span class="mais-titulo">Histórico de Falta de Energia</span>
+            <span class="mais-sub">Filtros, resumo e exportação para Excel</span>
+          </span>
+          <span class="mais-seta">›</span>
+        </button>
+        <button type="button" class="mais-item" disabled>
+          <span class="mais-icon">💡</span>
+          <span class="mais-texto">
+            <span class="mais-titulo">Controle de Lâmpadas</span>
+            <span class="mais-sub">Em breve</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
     <!-- HISTÓRICO -->
     <div id="historico-screen">
+      <button type="button" id="hist-voltar" class="hist-voltar">← Voltar</button>
       <p class="intro">Consulte os lançamentos já registrados e exporte para Excel sempre que precisar.</p>
 
       <div class="hist-filtros">
@@ -1060,6 +1161,21 @@
 
   </div>
 
+  <nav class="bottom-nav" id="bottom-nav">
+    <button type="button" class="nav-item active" id="nav-energia">
+      <span class="nav-icon">⚡</span><span class="nav-label">Energia</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-ambiencia">
+      <span class="nav-icon">🌡️</span><span class="nav-label">Ambiência</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-pintinhos">
+      <span class="nav-icon">🐣</span><span class="nav-label">Pintinhos</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-mais">
+      <span class="nav-icon">⋯</span><span class="nav-label">Mais</span>
+    </button>
+  </nav>
+
   </div><!-- /app-content -->
 </main>
 
@@ -1090,12 +1206,20 @@
     return JSON.parse(json);
   }
 
+  function iniciais(nome) {
+    const partes = (nome || '').trim().split(/\s+/);
+    if (partes.length === 0 || !partes[0]) return '?';
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  }
+
   function mostrarApp(usuario) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-content').style.display = 'block';
+    document.getElementById('avatar-wrap').style.display = 'block';
+    document.getElementById('avatar-btn').textContent = iniciais(usuario.nome);
     document.getElementById('user-nome').textContent = usuario.nome;
     document.getElementById('user-email').textContent = usuario.email;
-    document.getElementById('user-avatar').src = usuario.foto || '';
     const campoFuncionario = document.getElementById('funcionario');
     if (campoFuncionario) campoFuncionario.value = usuario.nome;
     const campoFuncionarioAmb = document.getElementById('ambFuncionario');
@@ -1105,6 +1229,7 @@
   }
 
   function mostrarLogin() {
+    document.getElementById('avatar-wrap').style.display = 'none';
     document.getElementById('login-screen').style.display = 'block';
     document.getElementById('app-content').style.display = 'none';
   }
@@ -1112,7 +1237,9 @@
   function handleCredentialResponse(response) {
     const loadingEl = document.getElementById('login-loading');
     const errorEl = document.getElementById('login-error');
+    const googleBtn = document.getElementById('google-signin-btn');
     errorEl.classList.remove('show');
+    googleBtn.style.display = 'none';
     loadingEl.classList.add('show');
 
     try {
@@ -1125,10 +1252,13 @@
         exp: dados.exp
       };
       localStorage.setItem(CHAVE_LOGIN, JSON.stringify(usuarioLogado));
-      loadingEl.classList.remove('show');
-      mostrarApp(usuarioLogado);
+      setTimeout(() => {
+        loadingEl.classList.remove('show');
+        mostrarApp(usuarioLogado);
+      }, 600);
     } catch (err) {
       loadingEl.classList.remove('show');
+      googleBtn.style.display = 'flex';
       errorEl.classList.add('show');
     }
   }
@@ -1158,7 +1288,20 @@
     if (window.google && google.accounts && google.accounts.id) {
       google.accounts.id.disableAutoSelect();
     }
+    document.getElementById('user-dropdown').classList.remove('show');
     mostrarLogin();
+  });
+
+  // ============ MENU DO AVATAR ============
+  document.getElementById('avatar-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('user-dropdown').classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('user-dropdown');
+    if (!dropdown.contains(e.target) && e.target.id !== 'avatar-btn') {
+      dropdown.classList.remove('show');
+    }
   });
 
   window.addEventListener('load', () => {
@@ -1506,80 +1649,77 @@
     document.getElementById('pintinhos-form-wrap').style.display = 'block';
   });
 
-  // ============ MENU PRINCIPAL (Falta de Energia / Ambiência / Pintinhos) ============
-  const menuFaltas = document.getElementById('menu-faltas');
-  const menuAmbiencia = document.getElementById('menu-ambiencia');
-  const menuPintinhos = document.getElementById('menu-pintinhos');
-  const subtabsFaltas = document.getElementById('subtabs-faltas');
+  // ============ NAVEGAÇÃO INFERIOR (Energia / Ambiência / Pintinhos / Mais) ============
+  const navEnergia = document.getElementById('nav-energia');
+  const navAmbiencia = document.getElementById('nav-ambiencia');
+  const navPintinhos = document.getElementById('nav-pintinhos');
+  const navMais = document.getElementById('nav-mais');
 
-  // ============ SUB-ABAS (dentro de Falta de Energia: Lançamento / Histórico) ============
-  const tabNovo = document.getElementById('tab-novo');
-  const tabHistorico = document.getElementById('tab-historico');
   const formScreen = document.getElementById('form-screen');
   const ambienciaScreen = document.getElementById('ambiencia-screen');
   const pintinhosScreen = document.getElementById('pintinhos-screen');
   const historicoScreen = document.getElementById('historico-screen');
+  const maisScreen = document.getElementById('mais-screen');
 
   let historicoCarregado = false;
 
   function esconderTudo() {
-    tabNovo.classList.remove('active');
-    tabHistorico.classList.remove('active');
     formScreen.style.display = 'none';
     ambienciaScreen.style.display = 'none';
     pintinhosScreen.style.display = 'none';
     historicoScreen.classList.remove('show');
+    maisScreen.style.display = 'none';
     document.getElementById('success-screen').classList.remove('show');
     document.getElementById('ambiencia-success').classList.remove('show');
     document.getElementById('pintinhos-success').classList.remove('show');
   }
 
-  function marcarMenuAtivo(ativo) {
-    menuFaltas.classList.toggle('active', ativo === 'faltas');
-    menuAmbiencia.classList.toggle('active', ativo === 'ambiencia');
-    menuPintinhos.classList.toggle('active', ativo === 'pintinhos');
+  function marcarNavAtivo(ativo) {
+    navEnergia.classList.toggle('active', ativo === 'energia');
+    navAmbiencia.classList.toggle('active', ativo === 'ambiencia');
+    navPintinhos.classList.toggle('active', ativo === 'pintinhos');
+    navMais.classList.toggle('active', ativo === 'mais');
   }
 
-  function abrirModuloFaltas() {
-    marcarMenuAtivo('faltas');
-    subtabsFaltas.style.display = 'flex';
+  function abrirEnergia() {
+    marcarNavAtivo('energia');
     esconderTudo();
-    tabNovo.classList.add('active');
     formScreen.style.display = 'block';
   }
 
-  function abrirModuloAmbiencia() {
-    marcarMenuAtivo('ambiencia');
-    subtabsFaltas.style.display = 'none';
+  function abrirAmbiencia() {
+    marcarNavAtivo('ambiencia');
     esconderTudo();
     ambienciaScreen.style.display = 'block';
   }
 
-  function abrirModuloPintinhos() {
-    marcarMenuAtivo('pintinhos');
-    subtabsFaltas.style.display = 'none';
+  function abrirPintinhos() {
+    marcarNavAtivo('pintinhos');
     esconderTudo();
     pintinhosScreen.style.display = 'block';
   }
 
-  menuFaltas.addEventListener('click', abrirModuloFaltas);
-  menuAmbiencia.addEventListener('click', abrirModuloAmbiencia);
-  menuPintinhos.addEventListener('click', abrirModuloPintinhos);
-
-  tabNovo.addEventListener('click', () => {
+  function abrirMais() {
+    marcarNavAtivo('mais');
     esconderTudo();
-    tabNovo.classList.add('active');
-    formScreen.style.display = 'block';
-  });
+    maisScreen.style.display = 'block';
+  }
 
-  tabHistorico.addEventListener('click', () => {
+  function abrirHistorico() {
+    marcarNavAtivo('mais');
     esconderTudo();
-    tabHistorico.classList.add('active');
     historicoScreen.classList.add('show');
     if (!historicoCarregado) {
       carregarHistorico();
     }
-  });
+  }
+
+  navEnergia.addEventListener('click', abrirEnergia);
+  navAmbiencia.addEventListener('click', abrirAmbiencia);
+  navPintinhos.addEventListener('click', abrirPintinhos);
+  navMais.addEventListener('click', abrirMais);
+  document.getElementById('mais-historico').addEventListener('click', abrirHistorico);
+  document.getElementById('hist-voltar').addEventListener('click', abrirMais);
 
   // ============ HISTÓRICO: carregar dados da planilha ============
   let todosRegistros = [];
