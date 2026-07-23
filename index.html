@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Qualitti Granjas</title>
+<title>Qualitti Granjas - Registros</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -184,7 +184,37 @@
     padding: 24px 18px 120px;
   }
 
-  /* ---------- Tabs ---------- */
+  /* ---------- Menu principal (módulos) ---------- */
+  .menu-principal{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .menu-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 6px;
+    padding: 13px 8px;
+    border-radius: 12px;
+    border: 1.6px solid var(--line);
+    background: #fff;
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .menu-btn.active{
+    background: var(--red-dark);
+    color: #fff;
+    border-color: var(--red-dark);
+    box-shadow: 0 4px 12px rgba(122,21,24,.25);
+  }
+
+  /* ---------- Tabs (sub-navegação dentro de um módulo) ---------- */
   .tabs{
     display:flex;
     gap: 6px;
@@ -612,8 +642,8 @@
 <header>
   <img src="logo.png" alt="Qualitti Alimentos">
   <div class="title-block">
-    <h1>Controle de Faltas de Energia</h1>
-    <p>Núcleos de Produção</p>
+    <h1>Qualitti Granjas</h1>
+    <p>Registros de Produção</p>
   </div>
 </header>
 <div class="circuit-line"></div>
@@ -644,9 +674,13 @@
     <button type="button" id="btn-logout">Sair</button>
   </div>
 
-  <div class="tabs">
-    <button type="button" class="tab-btn active" id="tab-novo">Novo Registro</button>
-    <button type="button" class="tab-btn" id="tab-ambiencia">Ambiência</button>
+  <div class="menu-principal">
+    <button type="button" class="menu-btn active" id="menu-faltas">⚡ Falta de Energia</button>
+    <button type="button" class="menu-btn" id="menu-ambiencia">🌡️ Ambiência</button>
+  </div>
+
+  <div class="tabs" id="subtabs-faltas">
+    <button type="button" class="tab-btn active" id="tab-novo">Lançamento</button>
     <button type="button" class="tab-btn" id="tab-historico">Histórico</button>
   </div>
 
@@ -1243,9 +1277,13 @@
     document.getElementById('ambiencia-form-wrap').style.display = 'block';
   });
 
-  // ============ ABAS (Novo Registro / Ambiência / Histórico) ============
+  // ============ MENU PRINCIPAL (Falta de Energia / Ambiência) ============
+  const menuFaltas = document.getElementById('menu-faltas');
+  const menuAmbiencia = document.getElementById('menu-ambiencia');
+  const subtabsFaltas = document.getElementById('subtabs-faltas');
+
+  // ============ SUB-ABAS (dentro de Falta de Energia: Lançamento / Histórico) ============
   const tabNovo = document.getElementById('tab-novo');
-  const tabAmbiencia = document.getElementById('tab-ambiencia');
   const tabHistorico = document.getElementById('tab-historico');
   const formScreen = document.getElementById('form-screen');
   const ambienciaScreen = document.getElementById('ambiencia-screen');
@@ -1255,7 +1293,6 @@
 
   function esconderTudo() {
     tabNovo.classList.remove('active');
-    tabAmbiencia.classList.remove('active');
     tabHistorico.classList.remove('active');
     formScreen.style.display = 'none';
     ambienciaScreen.style.display = 'none';
@@ -1264,16 +1301,30 @@
     document.getElementById('ambiencia-success').classList.remove('show');
   }
 
+  function abrirModuloFaltas() {
+    menuFaltas.classList.add('active');
+    menuAmbiencia.classList.remove('active');
+    subtabsFaltas.style.display = 'flex';
+    esconderTudo();
+    tabNovo.classList.add('active');
+    formScreen.style.display = 'block';
+  }
+
+  function abrirModuloAmbiencia() {
+    menuAmbiencia.classList.add('active');
+    menuFaltas.classList.remove('active');
+    subtabsFaltas.style.display = 'none';
+    esconderTudo();
+    ambienciaScreen.style.display = 'block';
+  }
+
+  menuFaltas.addEventListener('click', abrirModuloFaltas);
+  menuAmbiencia.addEventListener('click', abrirModuloAmbiencia);
+
   tabNovo.addEventListener('click', () => {
     esconderTudo();
     tabNovo.classList.add('active');
     formScreen.style.display = 'block';
-  });
-
-  tabAmbiencia.addEventListener('click', () => {
-    esconderTudo();
-    tabAmbiencia.classList.add('active');
-    ambienciaScreen.style.display = 'block';
   });
 
   tabHistorico.addEventListener('click', () => {
