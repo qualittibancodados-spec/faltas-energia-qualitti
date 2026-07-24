@@ -520,6 +520,34 @@
     cursor: pointer;
   }
 
+  .fila-banner{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    background: #FDEBC8;
+    border: 1.4px solid var(--gold);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+  }
+  .fila-texto{
+    flex:1;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red-dark);
+  }
+  .fila-banner button{
+    background: var(--red-dark);
+    color:#fff;
+    border:none;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor:pointer;
+    white-space: nowrap;
+  }
+
   .install-banner{
     display:none;
     align-items:center;
@@ -604,6 +632,11 @@
 
   <!-- APP (visível só depois do login) -->
   <div id="app-content" style="display:none;">
+
+  <div id="fila-banner" class="fila-banner" style="display:none;">
+    <span class="fila-texto" id="fila-texto">0 registros aguardando envio</span>
+    <button type="button" id="fila-sincronizar">Tentar agora</button>
+  </div>
 
   <div class="card">
 
@@ -722,7 +755,7 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <h2>Registrado com sucesso!</h2>
-      <p>O lançamento foi salvo na planilha da equipe.</p>
+      <p id="success-status-text">O lançamento foi salvo na planilha da equipe.</p>
       <div class="summary" id="summary-box"></div>
       <button class="btn-secondary" id="new-entry-btn">Registrar outra ocorrência</button>
     </div>
@@ -804,7 +837,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <h2>Registrado com sucesso!</h2>
-        <p>O registro de ambiência foi salvo na planilha da equipe.</p>
+        <p id="amb-status-text">O registro de ambiência foi salvo na planilha da equipe.</p>
         <div class="summary" id="amb-summary-box"></div>
         <button class="btn-secondary" id="amb-new-entry-btn">Registrar outro</button>
       </div>
@@ -927,7 +960,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <h2>Registrado com sucesso!</h2>
-        <p>O registro de qualidade de pintinhos foi salvo na planilha da equipe.</p>
+        <p id="pint-status-text">O registro de qualidade de pintinhos foi salvo na planilha da equipe.</p>
         <div class="summary" id="pint-summary-box"></div>
         <button class="btn-secondary" id="pint-new-entry-btn">Registrar outro</button>
       </div>
@@ -1000,6 +1033,8 @@
     if (campoFuncionarioAmb) campoFuncionarioAmb.value = usuario.nome;
     const campoFuncionarioPint = document.getElementById('pintFuncionario');
     if (campoFuncionarioPint) campoFuncionarioPint.value = usuario.nome;
+    atualizarBadgePendentes();
+    tentarSincronizarFila();
   }
 
   function mostrarLogin() {
@@ -1086,6 +1121,72 @@
       );
     }
   });
+
+  // ============ FILA DE ENVIOS OFFLINE ============
+  // Quando não há internet (ou o envio falha por rede), o registro é salvo
+  // no celular e reenviado sozinho assim que a conexão voltar.
+  const CHAVE_FILA = 'fila-envios-pendentes';
+
+  function lerFila() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_FILA)) || []; }
+    catch (e) { return []; }
+  }
+
+  function salvarFila(fila) {
+    localStorage.setItem(CHAVE_FILA, JSON.stringify(fila));
+    atualizarBadgePendentes();
+  }
+
+  function enfileirarRegistro(dadosObj) {
+    const fila = lerFila();
+    fila.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2), dados: dadosObj, criadoEm: new Date().toISOString() });
+    salvarFila(fila);
+  }
+
+  function atualizarBadgePendentes() {
+    const fila = lerFila();
+    const banner = document.getElementById('fila-banner');
+    const texto = document.getElementById('fila-texto');
+    if (fila.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+    banner.style.display = 'flex';
+    texto.textContent = fila.length === 1
+      ? '1 registro aguardando envio'
+      : `${fila.length} registros aguardando envio`;
+  }
+
+  async function enviarParaServidor(dadosObj) {
+    const fd = new FormData();
+    Object.keys(dadosObj).forEach(k => fd.append(k, dadosObj[k]));
+    if (usuarioLogado && usuarioLogado.idToken) {
+      fd.set('idToken', usuarioLogado.idToken);
+      fd.set('emailLogin', usuarioLogado.email || '');
+    }
+    await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+  }
+
+  let sincronizando = false;
+  async function tentarSincronizarFila() {
+    if (sincronizando || !navigator.onLine) return;
+    sincronizando = true;
+    let fila = lerFila();
+
+    for (const item of [...fila]) {
+      try {
+        await enviarParaServidor(item.dados);
+        fila = fila.filter(f => f.id !== item.id);
+        salvarFila(fila);
+      } catch (err) {
+        break; // ainda sem internet de verdade — para e tenta de novo depois
+      }
+    }
+    sincronizando = false;
+  }
+
+  window.addEventListener('online', tentarSincronizarFila);
+  document.getElementById('fila-sincronizar').addEventListener('click', tentarSincronizarFila);
 
   const form = document.getElementById('outage-form');
   const breakerBtn = document.getElementById('breaker-btn');
@@ -1183,12 +1284,25 @@
       data.append('idToken', usuarioLogado.idToken);
       data.append('emailLogin', usuarioLogado.email || '');
     }
+    const dadosObj = Object.fromEntries(data.entries());
 
     try{
       if(SCRIPT_URL.includes("COLE_AQUI")){
         throw new Error("CONFIG");
       }
-      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      let salvoOffline = false;
+      if (!navigator.onLine) {
+        enfileirarRegistro(dadosObj);
+        salvoOffline = true;
+      } else {
+        try {
+          await enviarParaServidor(dadosObj);
+        } catch (erroRede) {
+          enfileirarRegistro(dadosObj);
+          salvoOffline = true;
+        }
+      }
 
       // Monta resumo pra tela de sucesso
       const summaryBox = document.getElementById('summary-box');
@@ -1201,6 +1315,10 @@
         <div><span>Duração</span><span>${calcDuration(data.get('inicio'), data.get('retorno')) || '-'}</span></div>
         <div><span>Óleo Diesel</span><span>${data.get('consumoDiesel')} L</span></div>
       `;
+
+      document.getElementById('success-status-text').textContent = salvoOffline
+        ? '📴 Sem internet no momento — o registro foi salvo no celular e será enviado automaticamente assim que a conexão voltar.'
+        : 'O lançamento foi salvo na planilha da equipe.';
 
       document.getElementById('form-screen').style.display = 'none';
       document.getElementById('success-screen').classList.add('show');
@@ -1296,12 +1414,25 @@
       data.append('idToken', usuarioLogado.idToken);
       data.append('emailLogin', usuarioLogado.email || '');
     }
+    const dadosObj = Object.fromEntries(data.entries());
 
     try {
       if (SCRIPT_URL.includes("COLE_AQUI")) {
         throw new Error("CONFIG");
       }
-      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      let salvoOffline = false;
+      if (!navigator.onLine) {
+        enfileirarRegistro(dadosObj);
+        salvoOffline = true;
+      } else {
+        try {
+          await enviarParaServidor(dadosObj);
+        } catch (erroRede) {
+          enfileirarRegistro(dadosObj);
+          salvoOffline = true;
+        }
+      }
 
       const summaryBox = document.getElementById('amb-summary-box');
       summaryBox.innerHTML = `
@@ -1312,6 +1443,10 @@
         <div><span>Amônia</span><span>${data.get('amonia')} ppm</span></div>
         <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
       `;
+
+      document.getElementById('amb-status-text').textContent = salvoOffline
+        ? '📴 Sem internet no momento — o registro foi salvo no celular e será enviado automaticamente assim que a conexão voltar.'
+        : 'O registro de ambiência foi salvo na planilha da equipe.';
 
       document.getElementById('ambiencia-form-wrap').style.display = 'none';
       document.getElementById('ambiencia-success').classList.add('show');
@@ -1360,12 +1495,25 @@
       data.append('idToken', usuarioLogado.idToken);
       data.append('emailLogin', usuarioLogado.email || '');
     }
+    const dadosObj = Object.fromEntries(data.entries());
 
     try {
       if (SCRIPT_URL.includes("COLE_AQUI")) {
         throw new Error("CONFIG");
       }
-      await fetch(SCRIPT_URL, { method: "POST", body: data });
+
+      let salvoOffline = false;
+      if (!navigator.onLine) {
+        enfileirarRegistro(dadosObj);
+        salvoOffline = true;
+      } else {
+        try {
+          await enviarParaServidor(dadosObj);
+        } catch (erroRede) {
+          enfileirarRegistro(dadosObj);
+          salvoOffline = true;
+        }
+      }
 
       const summaryBox = document.getElementById('pint-summary-box');
       summaryBox.innerHTML = `
@@ -1374,13 +1522,17 @@
         <div><span>Data</span><span>${data.get('data').split('-').reverse().join('/')}</span></div>
         <div><span>Quantidade de Pintinhos</span><span>${data.get('quantidade')}</span></div>
         <div><span>Temp. Galpão / Caminhão</span><span>${data.get('tempGalpao')}°C / ${data.get('tempCaminhao')}°C</span></div>
-        <div><span>Temp. Cloacal fora do padrão</span><span>${data.get('tempCloacal')}</span></div>
-        <div><span>Plumagem ruim</span><span>${data.get('plumagem')}</span></div>
-        <div><span>Desidratação</span><span>${data.get('desidratacao')}</span></div>
-        <div><span>Umbigo aberto</span><span>${data.get('umbigo')}</span></div>
-        <div><span>Hematoma articulações</span><span>${data.get('hematoma')}</span></div>
+        <div><span>Temp. Cloacal fora do padrão</span><span>${data.get('tempCloacal') || '-'}</span></div>
+        <div><span>Plumagem ruim</span><span>${data.get('plumagem') || '-'}</span></div>
+        <div><span>Desidratação</span><span>${data.get('desidratacao') || '-'}</span></div>
+        <div><span>Umbigo aberto</span><span>${data.get('umbigo') || '-'}</span></div>
+        <div><span>Hematoma articulações</span><span>${data.get('hematoma') || '-'}</span></div>
         <div><span>Funcionário</span><span>${data.get('funcionario')}</span></div>
       `;
+
+      document.getElementById('pint-status-text').textContent = salvoOffline
+        ? '📴 Sem internet no momento — o registro foi salvo no celular e será enviado automaticamente assim que a conexão voltar.'
+        : 'O registro de qualidade de pintinhos foi salvo na planilha da equipe.';
 
       document.getElementById('pintinhos-form-wrap').style.display = 'none';
       document.getElementById('pintinhos-success').classList.add('show');
